@@ -72,6 +72,7 @@ public abstract class WebServer {
 	
 	public WebServer(String configFile) {
 		this();
+		//TODO Load config file
 	}
 	
 	public WebServer(String configFile, ExecutorService threadPool) {
@@ -80,6 +81,12 @@ public abstract class WebServer {
 	}
 	
 	public WebServer() {}
+	
+	private void init() {
+		//TODO init the web server
+		// -> handling routes
+		// -> FUTURE : handling middleware
+	}
 	
 	/**
 	 * Initializing routes for the webserver

@@ -11,7 +11,7 @@ public class Test extends WebServer{
 	
 	@Override
 	public void route(Router router) {
-		// TODO Auto-generated method stub
+		// TODO test if we can route some index.html file or even test.html
 		
 	}
 

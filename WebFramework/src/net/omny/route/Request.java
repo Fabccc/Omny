@@ -38,6 +38,7 @@ public final class Request {
 		this.method = Method.valueOf(firstLine[0]);
 		this.path = firstLine[1];
 		this.httpVersion = firstLine[2];
+		//TODO fully parse HTTP request
 		
 	}
 	
