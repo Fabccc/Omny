@@ -9,7 +9,7 @@ public class FileRoute implements Route{
 	@Getter
 	private String filePath;
 
-	private FileRoute(String filePath) {
+	public FileRoute(String filePath) {
 		this.filePath = filePath;
 	}
 	
