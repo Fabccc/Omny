@@ -81,6 +81,14 @@ public abstract class WebServer {
 	
 	public WebServer() {}
 	
+	/**
+	 * Initializing routes for the webserver
+	 * 
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param router The main router of the application
+	 * @date 08/08/2021
+	 */
 	public abstract void route(Router router);
 	
 	/**
