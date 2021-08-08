@@ -19,6 +19,14 @@ public final class Request {
 //	Sec-Fetch-Site: none
 //	Sec-Fetch-User: ?1
 
+	/**
+	 * 
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param req
+	 * @return
+	 * @date 08/08/2021
+	 */
 	public static Request parse(String req) {
 		String[] lines = req.split("\r\n");
 		return new Request(lines);
