@@ -76,6 +76,11 @@ public abstract class WebServer {
 		this();
 	}
 	
+	public WebServer(String configFile, ExecutorService threadPool) {
+		this(configFile);
+		this.threadPool = threadPool;
+	}
+	
 	public WebServer() {}
 	
 	public abstract void route(Router router);

@@ -1,5 +1,8 @@
 package net.omny.test;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import net.omny.route.Router;
 import net.omny.server.WebServer;
 
@@ -20,8 +23,8 @@ import net.omny.server.WebServer;
  * 		WebServer.launch(new Web());
  * 	}
  * 
- * 	Web(String conf){
- * 		super(conf);
+ * 	Web(){
+ * 		super("conf.toml");
  * 	}
  * 	
  * 	@Override
@@ -50,12 +53,15 @@ import net.omny.server.WebServer;
  */
 public class WebTest extends WebServer{
 
+	private static final ExecutorService SERVICE = Executors.newScheduledThreadPool(4);
+	
 	public static void main(String[] args) {
-		launch(new WebTest("conf.toml"));
+		launch(new WebTest());
 	}
 	
-	public WebTest(String configFile) {
-		super(configFile);
+	public WebTest() {
+		super("conf.toml", SERVICE);
+		
 	}
 
 	@Override
