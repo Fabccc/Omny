@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Getter;
 import net.omny.route.Request;
 import net.omny.route.Router;
+import net.omny.utils.Ex;
 
 public abstract class WebServer {
 
@@ -50,12 +51,8 @@ public abstract class WebServer {
 					Socket client = serverSocket.accept();
 					webServer.threadPool.submit(
 						() -> {
-							try {
-								System.out.println(Thread.currentThread().getName()+" is handling "+client.getInetAddress());
-								webServer.handler(client);
-							} catch (IOException e) {
-								e.printStackTrace();
-							}
+							System.out.println(Thread.currentThread().getName()+" is handling "+client.getInetAddress());
+							Ex.grab(() -> webServer.handler(client));
 						});
 				}
 			}catch(Exception e) {
