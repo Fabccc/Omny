@@ -65,6 +65,7 @@ public abstract class WebServer {
 	private Router router;
 	private WebServerConfig config;
 	private ExecutorService threadPool;
+	@Getter
 	protected int port = 8080;
 	@Getter 
 	private final AtomicBoolean running = new AtomicBoolean(false);
