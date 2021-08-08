@@ -1,6 +1,8 @@
 package net.omny.route;
 
-public class Request {
+import lombok.Getter;
+
+public final class Request {
 
 	// Get Request Example
 //	GET / HTTP/1.1
@@ -22,7 +24,20 @@ public class Request {
 		return new Request(lines);
 	}
 	
+	@Getter
+	private Method method;
+	@Getter
+	private String httpVersion;
+	@Getter
+	private String path;
+	
 	private Request(String[] lines) {
+		// Split by space
+		String[] firstLine = lines[0].split("\\s+");
+		// <METHOD> <PATH> <HTTP_VERSION>
+		this.method = Method.valueOf(firstLine[0]);
+		this.path = firstLine[1];
+		this.httpVersion = firstLine[2];
 		
 	}
 	
