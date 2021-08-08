@@ -15,7 +15,7 @@ public class FileRoute implements Route{
 	
 	@Override
 	public View handle(Request req, Response res) {
-		return FileView;
+		return null;
 	}
 
 }
