@@ -1,7 +1,9 @@
 package net.omny.route;
 
 
+
 import lombok.Getter;
+import net.omny.views.FileView;
 import net.omny.views.View;
 
 /**
@@ -17,6 +19,8 @@ public class FileRoute implements Route{
 	 */
 	@Getter
 	private String filePath;
+	
+	private FileView fileView;
 
 	/**
 	 * Constructor of the file
@@ -27,6 +31,7 @@ public class FileRoute implements Route{
 	 */
 	public FileRoute(String filePath) {
 		this.filePath = filePath;
+		this.fileView = new FileView(this.filePath);
 	}
 	
 	/**
@@ -40,7 +45,7 @@ public class FileRoute implements Route{
 	 */
 	@Override
 	public View handle(Request req, Response res) {
-		return null;
+		return this.fileView;
 	}
 
 }
