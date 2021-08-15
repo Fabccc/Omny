@@ -38,6 +38,8 @@ public final class Request {
 	private String httpVersion;
 	@Getter
 	private String path;
+	@Getter
+	private Map<String, String> headers;
 	
 	private Request(String[] lines) {
 		// Split by space
@@ -47,7 +49,12 @@ public final class Request {
 		this.path = firstLine[1];
 		this.httpVersion = firstLine[2];
 		//TODO fully parse HTTP request
-		
+
+		this.headers = new HashMap<>();
+		for(int i = 1; i < lines.length; i++){
+			String[] headerLines = lines[i].split("\\:s+");		
+			this.headers.put(headerLines[0], headerLines[1]);
+		}
 	}
 	
 }
