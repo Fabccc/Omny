@@ -1,5 +1,9 @@
 package net.omny.route;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.Getter;
 
 public final class Request {
@@ -38,7 +42,6 @@ public final class Request {
 	private String httpVersion;
 	@Getter
 	private String path;
-	@Getter
 	private Map<String, String> headers;
 	
 	private Request(String[] lines) {
@@ -52,9 +55,13 @@ public final class Request {
 
 		this.headers = new HashMap<>();
 		for(int i = 1; i < lines.length; i++){
-			String[] headerLines = lines[i].split("\\:s+");		
-			this.headers.put(headerLines[0], headerLines[1]);
+			String[] headerLines = lines[i].split(":\\s+");
+			this.headers.put(headerLines[0].toLowerCase(), headerLines[1]);
 		}
+	}
+	
+	public String getHeader(String header) {
+			return this.headers.get(header.toLowerCase());
 	}
 	
 }
