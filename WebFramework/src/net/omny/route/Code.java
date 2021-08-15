@@ -1,5 +1,11 @@
 package net.omny.route;
 
+/**
+ * {@link} https://developer.mozilla.org/fr/docs/Web/HTTP/Status
+ * @author Fabien CAYRE (Computer)
+ *
+ * @date 15/08/2021
+ */
 public enum Code {
 
 	// INFO RESPONSE CODE
