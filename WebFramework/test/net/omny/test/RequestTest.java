@@ -20,7 +20,16 @@ public class RequestTest{
     assertEquals(Method.GET, request.getMethod());
     assertEquals("/", request.getPath());
     assertEquals("localhost:8080", request.getHeader("Host"));
-    assertEquals("keep-alive", request.getHeader("connection"));
+  }
+  
+  @Test
+  public void testRequestIgnoreCase() {
+  	Request request = Request.parse(REQUEST);
+
+    assertEquals("localhost:8080", request.getHeader("Host"));
+    assertEquals("localhost:8080", request.getHeader("host"));
+    assertEquals("localhost:8080", request.getHeader("hOSt"));
+    assertEquals("localhost:8080", request.getHeader("hosT"));
   }
 
 }

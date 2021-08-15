@@ -42,7 +42,8 @@ public final class Request {
 	private String httpVersion;
 	@Getter
 	private String path;
-	private Map<String, String> headers;
+	
+	protected Map<String, String> headers;
 	
 	private Request(String[] lines) {
 		// Split by space
