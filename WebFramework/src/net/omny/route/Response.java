@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
+import lombok.Setter;
+import net.omny.utils.HTTP.Version;
 
 public class Response {
 
@@ -16,13 +18,11 @@ public class Response {
 //	Connection: Closed
 //	Content-Type: text/html; charset=iso-8859-1
 
-	@Getter
+	@Getter @Setter
 	private Code responseCode;
-	@Getter
-	private String httpVersion;
-	@Getter
-	private String path;
-	private Map<String, String> headers;
+	@Getter @Setter
+	private Version httpVersion;
+	private Map<String, String> headers = new HashMap<>();
 
 	/**
 	 * Creating response based on the request (taking the same
@@ -34,8 +34,11 @@ public class Response {
 	 */
 	public Response(Request req) {
 		this.responseCode = Code.S200_OK;
-		this.path = req.getPath();
 		this.headers = new HashMap<>(req.headers);
+	}
+	
+	public Response() {
+		
 	}
 
 	public String getHeader(String header) {
@@ -45,5 +48,25 @@ public class Response {
 	public String setHeader(String header, String value) {
 		return this.headers.put(header.toLowerCase(), value);
 	}
+	
+	public String toRawText() {
+		return toString();
+	}
+	
+	@Override
+	public String toString() {
+		String firstLine = this.httpVersion.getTag()+" "+this.responseCode.getCode()+" "+this.getResponseCode().getResponseText()+"\r\n";
+		StringBuilder fullText = new StringBuilder(firstLine);
+		// Add server attributes in the response text
+		if(this.headers.containsKey("server")) {
+			fullText.append("Server: "+this.headers.get("server")+"\r\n");
+		}else fullText.append("Server: Omny"+"\r\n");
+		
+		// Following specs, the response is ended by a \r\n\r\n
+		fullText.append("\r\n");
+		
+		return fullText.toString();
+	}
+	
 
 }
