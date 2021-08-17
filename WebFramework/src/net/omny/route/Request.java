@@ -1,10 +1,10 @@
 package net.omny.route;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
+import lombok.Setter;
 
 public final class Request {
 
@@ -43,8 +43,30 @@ public final class Request {
 	@Getter
 	private String path;
 	
-	protected Map<String, String> headers;
+	/**
+	 * Headers content
+	 */
+	protected Map<String, String> headers = new HashMap<>();
 	
+	/**
+	 * Represent URL parameters
+	 * Example:
+	 * "/foo/:bar"
+	 * =>
+	 * "/foo/TestTest"
+	 * TestTest is treated as parameter
+	 * and is accessible from params hashmap
+	 */
+	@Setter
+	private Map<String, String> params = new HashMap<>();
+	
+	/**
+	 * Private constructor
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param lines
+	 * @date 16/08/2021
+	 */
 	private Request(String[] lines) {
 		// Split by space
 		String[] firstLine = lines[0].split("\\s+");
@@ -52,15 +74,39 @@ public final class Request {
 		this.method = Method.valueOf(firstLine[0]);
 		this.path = firstLine[1];
 		this.httpVersion = firstLine[2];
-		//TODO fully parse HTTP request
 
-		this.headers = new HashMap<>();
 		for(int i = 1; i < lines.length; i++){
 			String[] headerLines = lines[i].split(":\\s+");
 			this.headers.put(headerLines[0].toLowerCase(), headerLines[1]);
 		}
 	}
 	
+	/**
+	 * Get a URL parameter from the HTTP URL request
+	 * This params Map might be empty before this request 
+	 * is handled in the function "handleRoute" from Router class
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param param
+	 * @return
+	 * @date 16/08/2021
+	 */
+	public String getParams(String param) {
+		return this.params.get(param);
+	}
+	
+	/**
+	 * Get a header from the parsed HTTP request
+	 * Example:
+	 * 
+	 * getHeader("host") => "example.com"
+	 * 
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param header
+	 * @return
+	 * @date 16/08/2021
+	 */
 	public String getHeader(String header) {
 			return this.headers.get(header.toLowerCase());
 	}
