@@ -1,6 +1,6 @@
 package net.omny.test;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class ViewTest {
 

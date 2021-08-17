@@ -1,10 +1,10 @@
 package net.omny.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import com.moandjiezana.toml.Toml;
 
@@ -16,7 +16,7 @@ public class TomlTest {
 	public void testTomlValue() {
 		Toml toml = new Toml().read(new File("./test.toml"));
 		
-		assertEquals(8080, toml.getLong("port"));
+		assertEquals(8080, (long) toml.getLong("port"));
 	}
 	
 }
