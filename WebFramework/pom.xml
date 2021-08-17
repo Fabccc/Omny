@@ -11,12 +11,14 @@
 		<testSourceDirectory>test</testSourceDirectory>
 		<plugins>
 			<plugin>
+
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
 					<release>11</release>
 				</configuration>
 			</plugin>
+
 		</plugins>
 	</build>
 
@@ -34,9 +36,16 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<version>5.7.2</version>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok-maven-plugin</artifactId>
+			<version>1.18.20.0</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13.2</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
