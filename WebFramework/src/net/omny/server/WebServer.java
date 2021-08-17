@@ -3,6 +3,7 @@ package net.omny.server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -100,7 +101,7 @@ public abstract class WebServer {
 	
 	/**
 	 * The handler of clientSocket
-	 * The handler must close the socket itmself due to Multithreading
+	 * The handler must close the socket itself due to Multithreading
 	 * @author Fabien CAYRE (Computer)
 	 *
 	 * @param clientSocket
@@ -119,6 +120,7 @@ public abstract class WebServer {
 		}
 		
 		Request.parse(requestBuilder.toString());
+		
 		
 		clientSocket.close();
 	}

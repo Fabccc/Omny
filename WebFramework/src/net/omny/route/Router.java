@@ -18,6 +18,21 @@ public class Router {
 		return this;
 	}
 	
+	/**
+	 * 
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param object
+	 * @return
+	 * @date 17/08/2021
+	 */
+	public Router route(Object object) {
+		// TODO Find all routes, using annotations
+		
+		return this;
+	}
+	
+	
 	public Router route(String path, Route route) {
 		this.routes.put(path, route);
 		return this;

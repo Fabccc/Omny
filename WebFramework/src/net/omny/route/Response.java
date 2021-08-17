@@ -53,6 +53,17 @@ public class Response {
 		return toString();
 	}
 	
+	/**
+	 * Returns the bytes of the response
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @return
+	 * @date 17/08/2021
+	 */
+	public char[] toChars() {
+		return toString().toCharArray();
+	}
+	
 	@Override
 	public String toString() {
 		String firstLine = this.httpVersion.getTag()+" "+this.responseCode.getCode()+" "+this.getResponseCode().getResponseText()+"\r\n";
@@ -62,7 +73,6 @@ public class Response {
 			fullText.append("Server: "+this.headers.get("server")+"\r\n");
 		}else fullText.append("Server: Omny"+"\r\n");
 		
-		// Following specs, the response is ended by a \r\n\r\n
 		fullText.append("\r\n");
 		
 		return fullText.toString();

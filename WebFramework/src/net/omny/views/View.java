@@ -1,11 +1,19 @@
 package net.omny.views;
 
-import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 
-//TODO find a way to put the content of the "view"
-// into the HTTP response
 public interface View {
 
-	void write(ByteBuffer buffer);
+	/**
+	 * 
+	 * Write to the passed buffer
+	 * 
+	 * You must flip the buffer before ending the function
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param buffer
+	 * @date 17/08/2021
+	 */
+	void write(CharBuffer buffer);
 	
 }
