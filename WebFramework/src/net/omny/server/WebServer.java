@@ -3,7 +3,6 @@ package net.omny.server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -13,6 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.Getter;
 import net.omny.route.Request;
 import net.omny.route.Router;
+import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 
 public abstract class WebServer {
@@ -42,17 +42,19 @@ public abstract class WebServer {
 			//TODO replace this value with either value from configFile or value depending on system capabilities
 			webServer.threadPool = Executors.newScheduledThreadPool(4);
 		}
+
+		webServer.init();
 		
 		webServer.threadPool.submit(() -> {
 			// Run the server
 			try (ServerSocket serverSocket = new ServerSocket(webServer.port)) {
-				System.out.println("Listening on port "+webServer.port);
+				Debug.debug("Listening on port "+webServer.port);
 				webServer.running.set(true);
 				while (webServer.running.get()) {
 					Socket client = serverSocket.accept();
 					webServer.threadPool.submit(
 						() -> {
-							System.out.println(Thread.currentThread().getName()+" is handling "+client.getInetAddress());
+							Debug.debug(Thread.currentThread().getName()+" is handling "+client.getInetAddress());
 							Ex.grab(() -> webServer.handler(client));
 						});
 				}
@@ -73,6 +75,7 @@ public abstract class WebServer {
 	
 	public WebServer(String configFile) {
 		this();
+		this.router = new Router();
 		//TODO Load config file
 	}
 	
@@ -87,6 +90,7 @@ public abstract class WebServer {
 		//TODO init the web server
 		// -> handling routes
 		// -> FUTURE : handling middleware
+		route(this.router);
 	}
 	
 	/**
@@ -109,6 +113,7 @@ public abstract class WebServer {
 	 * @date 08/08/2021
 	 */
 	public void handler(Socket clientSocket) throws IOException {
+		Debug.reset("handle_request");
 		BufferedReader br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
 		StringBuilder requestBuilder = new StringBuilder();
@@ -118,11 +123,13 @@ public abstract class WebServer {
 			// Line breaking is describe as CR LF => \r \n
 			requestBuilder.append(line + "\r\n");
 		}
+		Request request = Request.parse(requestBuilder.toString());
 		
-		Request.parse(requestBuilder.toString());
+		this.router.handleRoute(request, clientSocket);
 		
 		
 		clientSocket.close();
+		Debug.time("handle_request");
 	}
 	
 }
