@@ -2,7 +2,12 @@ package net.omny.route;
 
 
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import lombok.Getter;
+import net.omny.utils.Ex;
 import net.omny.views.FileView;
 import net.omny.views.View;
 
@@ -45,6 +50,10 @@ public class FileRoute implements Route{
 	 */
 	@Override
 	public View handle(Request req, Response res) {
+		Ex.grab(() -> {
+			String mimeType = Files.probeContentType(Path.of(this.filePath));
+			res.setHeader("Content-Type", mimeType);
+		});
 		return this.fileView;
 	}
 
