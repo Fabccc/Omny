@@ -5,6 +5,7 @@ module webframework {
 	exports net.omny.server;
 	requires lombok;
 	requires toml4j;
+	requires org.apache.commons.lang3;
 	
 	// Unit testing
 	//requires org.junit.jupiter.engine;
