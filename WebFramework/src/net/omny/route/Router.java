@@ -1,8 +1,14 @@
 package net.omny.route;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.nio.CharBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.omny.utils.Debug;
 import net.omny.views.View;
 
 public class Router {
@@ -38,6 +44,10 @@ public class Router {
 		return this;
 	}
 	
+	public Router route(String path, String filePath) {
+		return route(path, new FileRoute(filePath));
+	}
+	
 	/**
 	 * 
 	 * @author Fabien CAYRE (Computer)
@@ -46,7 +56,7 @@ public class Router {
 	 * @return true if at least one route is the path, false otherwise
 	 * @date 15/08/2021
 	 */
-	public boolean handleRoute(Request request) {
+	public boolean handleRoute(Request request, Socket client) throws IOException{
 		//TODO static files
 		
 		// Dynamic routing
@@ -59,8 +69,9 @@ public class Router {
 			// We can detect the route "/player/54" (the value in params is treated as String"
 			
 			
-			String[] division = path.getKey().split("\\");
-			String[] currentUrlDivision = request.getPath().split("\\");
+			//TODO use Regex for better handling
+			String[] division = path.getKey().split("\\\\");
+			String[] currentUrlDivision = request.getPath().split("\\\\");
 			
 			// The number of division is different from the current request division 
 			if(division.length != currentUrlDivision.length) {
@@ -81,15 +92,44 @@ public class Router {
 				}
 			}
 
+			Debug.debug("Found route for "+request.getPath());
+			
 			// current division path are the same
 			// It's the same route
 			request.setParams(params);
 			Response response = new Response(request);
 			
 			View view = path.getValue().handle(request, response);
+			CharBuffer bodyResponseBuffer = CharBuffer.allocate(512);
+			view.write(bodyResponseBuffer);
+			// We suppose the buffer is flipped
+			// Char is 2 bytes
+			int contentLength = bodyResponseBuffer.length()*2; // The content length of the response body, in bytes
 			
-			response.toString();
+			response.setHeader("Content-Length", String.valueOf(contentLength));
+
+			BufferedWriter clientWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+			// Writing header
+			clientWriter.write(response.toString());
+			// Writing body content
+			clientWriter.write(bodyResponseBuffer.array());
+			// End of HTTP response following the HTTP specs
+			clientWriter.write("\r\n");
+			// Flush the stream
+			clientWriter.flush();
+			
+			return true;
 		}
+		// Returning a 404 Not Found
+		Response response = new Response(request);
+		response.setResponseCode(Code.E404_NOT_FOUND);
+		BufferedWriter clientWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+		// Writing header
+		clientWriter.write(response.toString());
+		// End of HTTP response following the HTTP specs
+		clientWriter.write("\r\n");
+		// Flush the stream
+		clientWriter.flush();
 		return false;
 	}
 	
