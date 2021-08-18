@@ -10,6 +10,13 @@ public class HTTP {
 		V2("HTTP/2"),
 		V3("HTTP/3");
 		
+		public static Version byTag(String tag) {
+			for(Version v : Version.values())
+				if(v.tag.equals(tag))
+					return v;
+			return null;
+		}
+		
 		@Getter
 		private String tag;
 
