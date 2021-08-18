@@ -5,6 +5,7 @@ import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.omny.utils.HTTP;
 
 public final class Request {
 
@@ -39,7 +40,7 @@ public final class Request {
 	@Getter
 	private Method method;
 	@Getter
-	private String httpVersion;
+	private HTTP.Version httpVersion;
 	@Getter
 	private String path;
 	
@@ -73,7 +74,7 @@ public final class Request {
 		// <METHOD> <PATH> <HTTP_VERSION>
 		this.method = Method.valueOf(firstLine[0]);
 		this.path = firstLine[1];
-		this.httpVersion = firstLine[2];
+		this.httpVersion = HTTP.Version.byTag(firstLine[2]);
 
 		for(int i = 1; i < lines.length; i++){
 			String[] headerLines = lines[i].split(":\\s+");
