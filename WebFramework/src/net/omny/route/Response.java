@@ -1,7 +1,11 @@
 package net.omny.route;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -34,7 +38,8 @@ public class Response {
 	 */
 	public Response(Request req) {
 		this.responseCode = Code.S200_OK;
-		this.headers = new HashMap<>(req.headers);
+		this.headers = new HashMap<>();
+		this.httpVersion = req.getHttpVersion();
 	}
 	
 	public Response() {
@@ -72,6 +77,17 @@ public class Response {
 		if(this.headers.containsKey("server")) {
 			fullText.append("Server: "+this.headers.get("server")+"\r\n");
 		}else fullText.append("Server: Omny"+"\r\n");
+		
+		for(String header : this.headers.keySet()) {
+			String value = this.headers.get(header);
+			
+			String capitalized = Arrays.stream(header.split("\\-"))
+				.map(StringUtils::capitalize)
+				.collect(Collectors.joining("-"));
+			fullText.append(capitalized+": "+value+"\r\n");
+			
+		}
+		
 		
 		fullText.append("\r\n");
 		

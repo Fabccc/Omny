@@ -8,7 +8,6 @@ import java.io.BufferedWriter;
 import java.io.StringWriter;
 import java.nio.CharBuffer;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import net.omny.route.Code;
