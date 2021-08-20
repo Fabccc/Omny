@@ -20,6 +20,12 @@ public class Debug {
 		}
 	}
 	
+	public static void warn(String string) {
+		if(ENABLE) {
+			System.err.println("[Warn Debug] "+string);
+		}
+	}
+	
 	public static void time(String tag) {
 		if(ENABLE) {
 			if(chronos.containsKey(tag)) {
