@@ -1,6 +1,6 @@
 package net.omny.views;
 
-import java.nio.CharBuffer;
+import net.omny.route.Response;
 
 public interface View {
 
@@ -14,6 +14,6 @@ public interface View {
 	 * @param buffer
 	 * @date 17/08/2021
 	 */
-	void write(CharBuffer buffer);
+	void write(Response res);
 	
 }

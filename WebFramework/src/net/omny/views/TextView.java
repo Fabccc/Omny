@@ -1,25 +1,24 @@
 package net.omny.views;
 
-import java.nio.CharBuffer;
 import java.util.Objects;
 
-import net.omny.utils.Ex;
+import net.omny.route.Response;
 
 public class TextView implements View{
 
-	private char[] textBytes;
+	private String text;
 	
 	public TextView(String text) {
 		Objects.requireNonNull(text);
-		this.textBytes = text.toCharArray();
+		this.text = text;
+		if(!this.text.endsWith("\r\n")) {
+			this.text = this.text+"\r\n";
+		}
 	}
 	
 	@Override
-	public void write(CharBuffer buffer) {
-		Ex.grab(() -> {
-			buffer.put(textBytes);
-			buffer.flip();
-		});
+	public void write(Response res) {
+		res.addBody(text);
 	}
 
 }

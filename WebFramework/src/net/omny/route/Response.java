@@ -1,7 +1,9 @@
 package net.omny.route;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -9,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.omny.utils.Primitive;
 import net.omny.utils.HTTP.Version;
 
 public class Response {
@@ -27,6 +30,7 @@ public class Response {
 	@Getter @Setter
 	private Version httpVersion;
 	private Map<String, String> headers = new HashMap<>();
+	private List<Byte> body = new ArrayList<>();
 
 	/**
 	 * Creating response based on the request (taking the same
@@ -38,7 +42,6 @@ public class Response {
 	 */
 	public Response(Request req) {
 		this.responseCode = Code.S200_OK;
-		this.headers = new HashMap<>();
 		this.httpVersion = req.getHttpVersion();
 	}
 	
@@ -69,14 +72,35 @@ public class Response {
 		return toString().toCharArray();
 	}
 	
+	
+	public void addBody(String value) {
+		for(byte b : value.getBytes())
+			this.body.add(b);
+	}
+	
+	public void addBody(byte value) {
+		this.body.add(value);
+	}
+	
+	public void addBody(char value) {
+		byte first = (byte) (value >> 2);
+		byte sec = (byte) value;
+		this.body.add(first);
+		this.body.add(sec);
+	}
+	
 	@Override
 	public String toString() {
 		String firstLine = this.httpVersion.getTag()+" "+this.responseCode.getCode()+" "+this.getResponseCode().getResponseText()+"\r\n";
 		StringBuilder fullText = new StringBuilder(firstLine);
-		// Add server attributes in the response text
-		if(this.headers.containsKey("server")) {
-			fullText.append("Server: "+this.headers.get("server")+"\r\n");
-		}else fullText.append("Server: Omny"+"\r\n");
+		// Add server attributes in the response text if doesn't exists
+		if(!this.headers.containsKey("server")) {
+			this.headers.put("server", "Omny");
+		}
+		
+		if(!this.headers.containsKey("Content-Length")) {
+			this.headers.put("content-length", String.valueOf(this.body.size()));
+		}
 		
 		for(String header : this.headers.keySet()) {
 			String value = this.headers.get(header);
@@ -85,10 +109,13 @@ public class Response {
 				.map(StringUtils::capitalize)
 				.collect(Collectors.joining("-"));
 			fullText.append(capitalized+": "+value+"\r\n");
-			
 		}
 		
-		
+		fullText.append("\r\n");
+		if(this.body.size() == 0) {
+			return fullText.toString();
+		}
+		fullText.append(new String(Primitive.toArray(this.body)));
 		fullText.append("\r\n");
 		
 		return fullText.toString();

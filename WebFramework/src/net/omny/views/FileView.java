@@ -1,9 +1,9 @@
 package net.omny.views;
 
 import java.io.File;
-import java.nio.CharBuffer;
 import java.nio.file.Files;
 
+import net.omny.route.Response;
 import net.omny.utils.Ex;
 
 public class FileView implements View {
@@ -15,11 +15,12 @@ public class FileView implements View {
 	}
 
 	@Override
-	public void write(CharBuffer buffer) {
+	public void write(Response res) {
 		Ex.grab(() -> {
+
 			byte[] fileBytes = Files.readAllBytes(new File(this.filePath).toPath());
-			buffer.put(new String(fileBytes).toCharArray());
-			buffer.flip();
+			res.addBody(new String(fileBytes));
+			
 		});
 	}
 

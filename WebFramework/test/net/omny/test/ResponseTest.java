@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.BufferedWriter;
 import java.io.StringWriter;
-import java.nio.CharBuffer;
 
 import org.junit.Test;
 
@@ -25,7 +24,7 @@ public class ResponseTest{
 		response.setResponseCode(Code.E404_NOT_FOUND);
 		response.setHeader("Server", "Nginx");
 		
-		assertEquals("HTTP/1.1 404 Not Found\r\nServer: Nginx\r\n\r\n", response.toString());
+		assertEquals("HTTP/1.1 404 Not Found\r\nServer: Nginx\r\nContent-Length: 0\r\n\r\n", response.toString());
 	}
 	
 	@Test
@@ -40,23 +39,16 @@ public class ResponseTest{
 		response.setHttpVersion(Version.V1_1);
 		response.setResponseCode(Code.S200_OK);
 		
-		CharBuffer responseBodyBuffer = CharBuffer.allocate(512);
-		txtView.write(responseBodyBuffer);
+		txtView.write(response);
 		
 		Ex.grab(() -> {
-			// Buffer contains response header
+			// Response contains  header, body and CRLF
 			writer.write(response.toChars());
-			writer.flush();
-			// The buffer contains the response body as byte array
-			writer.write(responseBodyBuffer.array());
-			writer.flush();
-			// End of HTTP response following the HTTP specs
-			writer.write("\r\n");
 			writer.flush();
 		});
 		StringBuffer fullHTTPResponse = fakeClientSocket.getBuffer();
 		String resultString = fullHTTPResponse.toString().trim()+"\r\n\r\n";
-		assertEquals("HTTP/1.1 200 OK\r\nServer: Omny\r\n\r\nThis is a text !!!\r\n\r\n", resultString);
+		assertEquals("HTTP/1.1 200 OK\r\nServer: Omny\r\nContent-Length: 20\r\n\r\nThis is a text !!!\r\n\r\n", resultString);
 	}
 	
 }
