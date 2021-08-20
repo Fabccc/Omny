@@ -21,6 +21,7 @@ public class Test extends WebServer{
 	@Override
 	public void route(Router router) {
 		router.route("/", "index.html");
+		router.route("/admission", "admission.pdf");
 	}
 
 }

@@ -12,7 +12,7 @@ import org.junit.Test;
 import net.omny.route.Code;
 import net.omny.route.Response;
 import net.omny.utils.Ex;
-import net.omny.utils.HTTP.Version;
+import net.omny.utils.HTTPUtils.Version;
 import net.omny.views.TextView;
 
 public class ResponseTest{

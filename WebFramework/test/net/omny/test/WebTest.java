@@ -7,7 +7,7 @@ import net.omny.route.Router;
 import net.omny.server.WebServer;
 
 /**
- * Je dois pouvoir faire écrire un code comme celui-ci :
+ * Je dois pouvoir écrire un code comme celui-ci :
  * <pre>
  * WebServer ws = WebServer.builder()
  * 	.route("/", "index.html")

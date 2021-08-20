@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 import net.omny.utils.Primitive;
-import net.omny.utils.HTTP.Version;
+import net.omny.utils.HTTPUtils.Version;
 
 public class Response {
 

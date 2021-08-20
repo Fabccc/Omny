@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.nio.CharBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +33,8 @@ public class Router {
 	 */
 	public Router route(Object object) {
 		// TODO Find all routes, using annotations
-		
+		Class<?> clazz = object.getClass();
+		// Get all the method 
 		return this;
 	}
 	
@@ -100,21 +100,14 @@ public class Router {
 			Response response = new Response(request);
 			
 			View view = path.getValue().handle(request, response);
-			CharBuffer bodyResponseBuffer = CharBuffer.allocate(512);
-			view.write(bodyResponseBuffer);
-			// We suppose the buffer is flipped
-			// Char is 2 bytes
-			int contentLength = bodyResponseBuffer.length()*2; // The content length of the response body, in bytes
-			
-			response.setHeader("Content-Length", String.valueOf(contentLength));
+			view.write(response);
+			// The content length of the response body, in bytes
 
 			BufferedWriter clientWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
 			// Writing header
-			clientWriter.write(response.toString());
 			// Writing body content
-			clientWriter.write(bodyResponseBuffer.array());
 			// End of HTTP response following the HTTP specs
-			clientWriter.write("\r\n");
+			clientWriter.write(response.toString());
 			// Flush the stream
 			clientWriter.flush();
 			

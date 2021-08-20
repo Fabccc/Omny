@@ -2,7 +2,7 @@ package net.omny.utils;
 
 import lombok.Getter;
 
-public class HTTP {
+public class HTTPUtils {
 
 	public enum Version {
 
