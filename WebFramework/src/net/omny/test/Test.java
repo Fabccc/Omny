@@ -3,8 +3,15 @@ package net.omny.test;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import net.omny.route.FileRoute;
+import net.omny.route.HTTP;
+import net.omny.route.Request;
+import net.omny.route.Response;
+import net.omny.route.Route;
 import net.omny.route.Router;
 import net.omny.server.WebServer;
+import net.omny.views.TextView;
+import net.omny.views.View;
 
 public class Test extends WebServer{
 
@@ -21,7 +28,21 @@ public class Test extends WebServer{
 	@Override
 	public void route(Router router) {
 		router.route("/", "index.html");
+		router.route(TestRouter.class);
 		router.staticRoute("./static");
+	}
+	
+	public static class TestRouter {
+		
+		@HTTP(url = "/loulou")
+		public Route fileRoute = new FileRoute("loulou.json");
+		
+		@HTTP(url = "/trolol")
+		public View index(Request req, Response res) {
+			res.setHeader("Content-Type", "text/plain");
+			return new TextView("trolololllololololololololololo");
+		}
+		
 	}
 
 }
