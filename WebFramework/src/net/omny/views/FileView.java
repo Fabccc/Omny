@@ -8,17 +8,21 @@ import net.omny.utils.Ex;
 
 public class FileView implements View {
 
-	private String filePath;
+	private File file;
 
 	public FileView(String filePath) {
-		this.filePath = filePath;
+		this.file = new File(filePath);
 	}
-
+	
+	public FileView(File file) {
+		this.file = file;
+	}
+	
 	@Override
 	public void write(Response res) {
 		Ex.grab(() -> {
 
-			byte[] fileBytes = Files.readAllBytes(new File(this.filePath).toPath());
+			byte[] fileBytes = Files.readAllBytes(file.toPath());
 			res.addBody(fileBytes);
 			
 		});

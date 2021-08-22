@@ -2,6 +2,7 @@ package net.omny.route;
 
 
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,6 +40,19 @@ public class FileRoute implements Route{
 		this.filePath = filePath;
 		this.fileView = new FileView(this.filePath);
 	}
+	
+	/**
+	 * 
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param file
+	 * @date 22/08/2021
+	 */
+	public FileRoute(File file) {
+		this.filePath = file.getPath();
+		this.fileView = new FileView(file);
+	}
+	
 	
 	/**
 	 * The route handler process

@@ -1,14 +1,14 @@
 package net.omny.route;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.omny.utils.Debug;
 import net.omny.utils.Primitive;
@@ -16,6 +16,22 @@ import net.omny.views.View;
 
 public class Router {
 
+	public enum StaticPolicy{
+		
+		FOR_EACH_REQUEST,
+		ON_STARTUP_LOAD,
+		REQUEST_AND_LOAD;
+		
+		private Consumer<Router> onChoose;
+
+		private StaticPolicy() {}
+
+		private StaticPolicy(Consumer<Router> onChoose) {
+			this.onChoose = onChoose;
+		}
+	}
+	
+	
 	private Map<String, Route> routes = new HashMap<>();
 
 	public Router() {
@@ -42,6 +58,48 @@ public class Router {
 		return this;
 	}
 	
+	/**
+	 * Static routing for files like CSS, JS etc...
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param staticFolder path to folder (relative)
+	 * @return the router
+	 * @date 22/08/2021
+	 */
+	public Router staticRoute(String staticFolder) {
+		return staticRoute(staticFolder, StaticPolicy.ON_STARTUP_LOAD);
+	}
+	
+	/**
+	 * Static routing for files like CSS, JS etc...
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param staticFolder staticFolder path to folder (relative)
+	 * @param policy Policy of static files routing
+	 * @return
+	 * @date 22/08/2021
+	 */
+	public Router staticRoute(String staticFolder, StaticPolicy policy) {
+		if(policy == null) return this;
+		if(policy == StaticPolicy.ON_STARTUP_LOAD) {
+			File rootFolder = new File(staticFolder);
+			if(rootFolder.isFile()) {
+				throw new IllegalArgumentException("Require a folder, file was provide");
+			}
+			for(File subFile : rootFolder.listFiles())
+				routeFile("", subFile);
+		}
+		return this;
+	}
+	
+	private void routeFile(String path, File file) {
+		if(file.isDirectory()) {
+			for(File subFile : file.listFiles())
+				routeFile(path+"/"+file.getName(), subFile);
+		}
+		Debug.debug("Routing {"+path+"/"+file.getName()+"}");
+		route(path+"/"+file.getName(), new FileRoute(file));
+	}
 	
 	public Router route(String path, Route route) {
 		this.routes.put(path, route);
