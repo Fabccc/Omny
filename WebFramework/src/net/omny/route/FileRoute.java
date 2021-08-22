@@ -8,6 +8,7 @@ import java.nio.file.Path;
 
 import lombok.Getter;
 import net.omny.utils.Ex;
+import net.omny.utils.HTTPUtils;
 import net.omny.views.FileView;
 import net.omny.views.View;
 
@@ -52,6 +53,15 @@ public class FileRoute implements Route{
 	public View handle(Request req, Response res) {
 		Ex.grab(() -> {
 			String mimeType = Files.probeContentType(Path.of(this.filePath));
+			if(mimeType == null) {
+				mimeType = HTTPUtils.findMime(this.filePath);
+			}
+			if(mimeType.equals("application/pdf")) {
+				res.setBinary(true);
+			}
+			if(mimeType.equals("application/x-msdownload")) {
+				res.setBinary(true);
+			}
 			res.setHeader("Content-Type", mimeType);
 		});
 		return this.fileView;

@@ -11,8 +11,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.omny.utils.Primitive;
 import net.omny.utils.HTTPUtils.Version;
+import net.omny.utils.Primitive;
 
 public class Response {
 
@@ -30,7 +30,10 @@ public class Response {
 	@Getter @Setter
 	private Version httpVersion;
 	private Map<String, String> headers = new HashMap<>();
+	@Getter
 	private List<Byte> body = new ArrayList<>();
+	@Getter @Setter
+	private boolean binary;
 
 	/**
 	 * Creating response based on the request (taking the same
@@ -53,9 +56,19 @@ public class Response {
 		return this.headers.get(header.toLowerCase());
 	}
 
-	public String setHeader(String header, String value) {
-		return this.headers.put(header.toLowerCase(), value);
+	public void setHeader(String header, String value) {
+		this.headers.put(header.toLowerCase(), value);
 	}
+	
+	
+	public void appendHeader(String header, String value) {
+		String lowerCaseHeader = header.toLowerCase();
+		if(this.headers.containsKey(lowerCaseHeader)) {
+			this.headers.put(lowerCaseHeader, this.headers.get(lowerCaseHeader).concat(";"+value));
+		}else
+			setHeader(lowerCaseHeader, value);
+	}
+	
 	
 	public String toRawText() {
 		return toString();
@@ -78,6 +91,11 @@ public class Response {
 			this.body.add(b);
 	}
 	
+	public void addBody(byte[] value) {
+		for(byte b : value)
+			this.body.add(b);
+	}
+	
 	public void addBody(byte value) {
 		this.body.add(value);
 	}
@@ -95,11 +113,14 @@ public class Response {
 		StringBuilder fullText = new StringBuilder(firstLine);
 		// Add server attributes in the response text if doesn't exists
 		if(!this.headers.containsKey("server")) {
-			this.headers.put("server", "Omny");
+			setHeader("server", "Omny");
 		}
 		
 		if(!this.headers.containsKey("Content-Length")) {
-			this.headers.put("content-length", String.valueOf(this.body.size()));
+			setHeader("content-length", String.valueOf(this.body.size()));
+		}
+		if(!this.binary) {
+			appendHeader("content-type", "charset=UTF-8");
 		}
 		
 		for(String header : this.headers.keySet()) {
@@ -115,8 +136,10 @@ public class Response {
 		if(this.body.size() == 0) {
 			return fullText.toString();
 		}
-		fullText.append(new String(Primitive.toArray(this.body)));
-		fullText.append("\r\n");
+		if(!this.binary) {
+			fullText.append(new String(Primitive.toArray(this.body)));
+			fullText.append("\r\n");
+		}
 		
 		return fullText.toString();
 	}

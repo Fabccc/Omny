@@ -2,12 +2,16 @@ package net.omny.route;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.omny.utils.Debug;
+import net.omny.utils.Primitive;
 import net.omny.views.View;
 
 public class Router {
@@ -103,20 +107,35 @@ public class Router {
 			view.write(response);
 			// The content length of the response body, in bytes
 
-			BufferedWriter clientWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-			// Writing header
-			// Writing body content
-			// End of HTTP response following the HTTP specs
-			clientWriter.write(response.toString());
-			// Flush the stream
-			clientWriter.flush();
-			
+			if(response.isBinary()) {
+				Debug.debug("File is binary");
+				client.getOutputStream().write(response.toString().getBytes(StandardCharsets.UTF_8));
+				
+				client.getOutputStream().write(Primitive.toArray(response.getBody()));
+				
+				client.getOutputStream().write("\r\n\r\n".getBytes());
+				
+				client.getOutputStream().flush();
+			}else {
+				BufferedWriter clientWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+				// Writing header
+				// Writing body content
+				// End of HTTP response following the HTTP specs
+				clientWriter.write(response.toString());
+				// Flush the stream
+				clientWriter.flush();
+			}
 			return true;
 		}
 		// Returning a 404 Not Found
 		Response response = new Response(request);
 		response.setResponseCode(Code.E404_NOT_FOUND);
-		BufferedWriter clientWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+		
+		var clientStream = client.getOutputStream();
+		var clientStreamWriter = new OutputStreamWriter(clientStream);
+		
+		
+		BufferedWriter clientWriter = new BufferedWriter(clientStreamWriter);
 		// Writing header
 		clientWriter.write(response.toString());
 		// End of HTTP response following the HTTP specs

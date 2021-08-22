@@ -19,7 +19,7 @@ public class FileView implements View {
 		Ex.grab(() -> {
 
 			byte[] fileBytes = Files.readAllBytes(new File(this.filePath).toPath());
-			res.addBody(new String(fileBytes));
+			res.addBody(fileBytes);
 			
 		});
 	}
