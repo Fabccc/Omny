@@ -174,15 +174,15 @@ public class Router {
 	}
 
 	/**
-	 * 
+	 * Handle routing and finding response
 	 * @author Fabien CAYRE (Computer)
 	 *
 	 * @param request The request of the client
+	 * @param client The socket to write to
 	 * @return true if at least one route is the path, false otherwise
 	 * @date 15/08/2021
 	 */
 	public boolean handleRoute(Request request, Socket client) throws IOException {
-		// TODO static files
 
 		// Dynamic routing
 		RouteLoop: for (RouteData path : this.routes) {
