@@ -3,12 +3,12 @@ package net.omny.test;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import net.omny.route.FileRoute;
 import net.omny.route.HTTP;
 import net.omny.route.Request;
 import net.omny.route.Response;
 import net.omny.route.Route;
 import net.omny.route.Router;
+import net.omny.route.impl.FileRoute;
 import net.omny.server.WebServer;
 import net.omny.views.TextView;
 import net.omny.views.View;

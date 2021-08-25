@@ -3,8 +3,8 @@ package net.omny.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.omny.route.FileRoute;
 import net.omny.route.Route;
+import net.omny.route.impl.FileRoute;
 
 public class WebServerBuilder {
 
