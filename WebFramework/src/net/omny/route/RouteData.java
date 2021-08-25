@@ -7,6 +7,8 @@ import lombok.Getter;
 public class RouteData {
   
   @Getter
+  private String url;
+  @Getter
   private Route route;
   @Getter
   private Method method;

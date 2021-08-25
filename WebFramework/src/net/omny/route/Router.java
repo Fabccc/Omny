@@ -7,7 +7,9 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -36,14 +38,14 @@ public class Router {
 		}
 	}
 
-	private Map<String, RouteData> routes = new HashMap<>();
+	private List<RouteData> routes = new ArrayList<>();
 
 	public Router() {
 
 	}
 
 	public Router route(Router router) {
-		this.routes.putAll(router.routes);
+		this.routes.addAll(router.routes);
 		return this;
 	}
 
@@ -85,7 +87,9 @@ public class Router {
 						if (method.getParameterCount() == 2) {
 							if (method.getParameterTypes()[0] == Request.class
 								&& method.getParameterTypes()[1] == Response.class) {
+								// Both res and req are present as parameter
 								HTTP annotation = method.getAnnotation(HTTP.class);
+								// We get annotation content
 								route(annotation.url(), (req, res) -> {
 									return Ex.grab(() -> (View) method.invoke(object, req, res));
 								}, annotation.method());
@@ -155,7 +159,13 @@ public class Router {
 	}
 
 	public Router route(String path, Route route, Method method) {
-		this.routes.put(path, new RouteData(route, method));
+		if(this.routes.stream()
+			.filter(r -> r.getUrl().equals(path) && r.getMethod() == method)
+			.findFirst()
+			.isPresent()){
+				throw new IllegalStateException("A route with this path AND method already exists");
+			}
+		this.routes.add(new RouteData(path, route, method));
 		return this;
 	}
 
@@ -175,8 +185,8 @@ public class Router {
 		// TODO static files
 
 		// Dynamic routing
-		RouteLoop: for (Map.Entry<String, RouteData> path : this.routes.entrySet()) {
-			if(path.getValue().getMethod() != request.getMethod())
+		RouteLoop: for (RouteData path : this.routes) {
+			if(path.getMethod() != request.getMethod())
 				continue;
 			// Split the current path to the divison
 			// "/foo/bar/baz" => ["foo", "bar", "baz"]
@@ -187,7 +197,7 @@ public class Router {
 			// String"
 
 			// TODO use Regex for better handling
-			String[] division = path.getKey().split("\\\\");
+			String[] division = path.getUrl().split("\\\\");
 			String[] currentUrlDivision = request.getPath().split("\\\\");
 
 			// The number of division is different from the current request division
@@ -216,7 +226,7 @@ public class Router {
 			request.setParams(params);
 			Response response = new Response(request);
 
-			View view = path.getValue().getRoute().handle(request, response);
+			View view = path.getRoute().handle(request, response);
 			view.write(response);
 			// The content length of the response body, in bytes
 
