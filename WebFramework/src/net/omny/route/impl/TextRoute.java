@@ -16,6 +16,7 @@ public class TextRoute implements Route{
 
 	@Override
 	public View handle(Request req, Response res) {
+		res.setHeader("Content-Type", "text/plain");
 		return this.view;
 	}
 
