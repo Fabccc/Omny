@@ -27,13 +27,15 @@ public class Test extends WebServer{
 	
 	@Override
 	public void route(Router router) {
-		router.route("/", "index.html");
 		router.route(TestRouter.class);
 		router.staticRoute("./static");
 	}
 	
 	public static class TestRouter {
 		
+		@HTTP(url = "/")
+		public Route indexRoute = new FileRoute("index.html");
+
 		@HTTP(url = "/loulou")
 		public Route fileRoute = new FileRoute("loulou.json");
 		
