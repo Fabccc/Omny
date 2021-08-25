@@ -16,6 +16,9 @@ import net.omny.utils.Ex;
 import net.omny.utils.Primitive;
 import net.omny.views.View;
 
+/**
+ * 
+ */
 public class Router {
 
 	public enum StaticPolicy {
@@ -33,7 +36,7 @@ public class Router {
 		}
 	}
 
-	private Map<String, Route> routes = new HashMap<>();
+	private Map<String, RouteData> routes = new HashMap<>();
 
 	public Router() {
 
@@ -85,7 +88,7 @@ public class Router {
 								HTTP annotation = method.getAnnotation(HTTP.class);
 								route(annotation.url(), (req, res) -> {
 									return Ex.grab(() -> (View) method.invoke(object, req, res));
-								});
+								}, annotation.method());
 							}
 						}
 					}
@@ -98,7 +101,7 @@ public class Router {
 				if (field.isAnnotationPresent(HTTP.class)) {
 					if (Route.class.isAssignableFrom(field.getType())) {
 						HTTP annotation = field.getAnnotation(HTTP.class);
-						route(annotation.url(), Ex.grab(() -> (Route) field.get(object)));
+						route(annotation.url(), Ex.grab(() -> (Route) field.get(object)), annotation.method());
 					}
 				}
 			}
@@ -148,16 +151,16 @@ public class Router {
 			for (File subFile : file.listFiles()) routeFile(path + "/" + file.getName(), subFile);
 		}
 		Debug.debug("Routing {" + path + "/" + file.getName() + "}");
-		route(path + "/" + file.getName(), new FileRoute(file));
+		route(path + "/" + file.getName(), new FileRoute(file), Method.GET);
 	}
 
-	public Router route(String path, Route route) {
-		this.routes.put(path, route);
+	public Router route(String path, Route route, Method method) {
+		this.routes.put(path, new RouteData(route, method));
 		return this;
 	}
 
 	public Router route(String path, String filePath) {
-		return route(path, new FileRoute(filePath));
+		return route(path, new FileRoute(filePath), Method.GET);
 	}
 
 	/**
@@ -172,7 +175,9 @@ public class Router {
 		// TODO static files
 
 		// Dynamic routing
-		RouteLoop: for (Map.Entry<String, Route> path : this.routes.entrySet()) {
+		RouteLoop: for (Map.Entry<String, RouteData> path : this.routes.entrySet()) {
+			if(path.getValue().getMethod() != request.getMethod())
+				continue;
 			// Split the current path to the divison
 			// "/foo/bar/baz" => ["foo", "bar", "baz"]
 			// Used to detect the params in URL
@@ -211,7 +216,7 @@ public class Router {
 			request.setParams(params);
 			Response response = new Response(request);
 
-			View view = path.getValue().handle(request, response);
+			View view = path.getValue().getRoute().handle(request, response);
 			view.write(response);
 			// The content length of the response body, in bytes
 
