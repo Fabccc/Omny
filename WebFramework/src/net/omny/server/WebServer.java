@@ -9,9 +9,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.moandjiezana.toml.Toml;
+
 import lombok.Getter;
 import net.omny.route.Request;
 import net.omny.route.Router;
+import net.omny.utils.ConfigFile;
 import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 
@@ -69,7 +72,7 @@ public abstract class WebServer {
 	private WebServerConfig config;
 	private ExecutorService threadPool;
 	@Getter
-	protected int port = 8080;
+	protected int port = (int) ConfigFile.DEFAULT_PORT;
 	@Getter 
 	private final AtomicBoolean running = new AtomicBoolean(false);
 	
@@ -77,6 +80,9 @@ public abstract class WebServer {
 		this();
 		this.router = new Router();
 		//TODO Load config file
+		Toml toml = new Toml().read(configFile);
+		this.port = toml.getLong(ConfigFile.PORT, ConfigFile.DEFAULT_PORT).intValue();
+		
 	}
 	
 	public WebServer(String configFile, ExecutorService threadPool) {
