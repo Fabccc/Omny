@@ -31,6 +31,15 @@ public class Debug {
 		}
 	}
 
+	public static void time(String tag, String message){
+		if(ENABLE){
+			if(chronos.get().containsKey(tag)){
+				System.out.println("[Timer Debug] "+
+				message.replace("{ms}", String.valueOf(System.currentTimeMillis() - chronos.get().get(tag))));
+			}
+		}
+	}
+
 	public static void time(String tag) {
 		if (ENABLE) {
 			if (chronos.get().containsKey(tag)) {

@@ -17,7 +17,7 @@ public class HTTPUtils {
 			for(Version v : Version.values())
 				if(v.tag.equals(tag))
 					return v;
-			return null;
+			return V1_1;
 		}
 		
 		@Getter

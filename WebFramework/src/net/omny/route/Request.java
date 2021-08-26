@@ -5,6 +5,7 @@ import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
 
 public final class Request {
@@ -72,7 +73,7 @@ public final class Request {
 		// Split by space
 		String[] firstLine = lines[0].split("\\s+");
 		// <METHOD> <PATH> <HTTP_VERSION>
-		this.method = Method.valueOf(firstLine[0]);
+		this.method = Ex.grab(() -> Method.valueOf(firstLine[0]), Method.GET);
 		this.path = firstLine[1];
 		this.httpVersion = HTTPUtils.Version.byTag(firstLine[2]);
 

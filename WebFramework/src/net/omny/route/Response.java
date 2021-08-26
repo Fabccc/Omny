@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 import net.omny.utils.HTTPUtils.Version;
+import net.omny.utils.HTTPUtils;
 import net.omny.utils.Primitive;
 
 public class Response {
@@ -26,9 +27,9 @@ public class Response {
 //	Content-Type: text/html; charset=iso-8859-1
 
 	@Getter @Setter
-	private Code responseCode;
+	private Code responseCode = Code.S200_OK;
 	@Getter @Setter
-	private Version httpVersion;
+	private Version httpVersion = HTTPUtils.Version.V1_1;
 	private Map<String, String> headers = new HashMap<>();
 	@Getter
 	private List<Byte> body = new ArrayList<>();
@@ -105,6 +106,10 @@ public class Response {
 		byte sec = (byte) value;
 		this.body.add(first);
 		this.body.add(sec);
+	}
+
+	public String realToString(){
+		return "Response {httpVersion: "+this.httpVersion+", responseCode: "+this.responseCode.getCode()+", responseText: "+this.responseCode.getResponseText()+" }";
 	}
 	
 	@Override

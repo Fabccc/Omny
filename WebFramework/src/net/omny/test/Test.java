@@ -15,7 +15,7 @@ import net.omny.views.View;
 
 public class Test extends WebServer{
 
-	private static final ExecutorService SERVICE = Executors.newScheduledThreadPool(4);
+	private static final ExecutorService SERVICE = Executors.newScheduledThreadPool(6);
 	
 	public static void main(String[] args) {
 		launch(new Test());

@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.moandjiezana.toml.Toml;
+//import com.moandjiezana.toml.Toml;
 
 import lombok.Getter;
 import net.omny.route.Request;
@@ -80,8 +80,8 @@ public abstract class WebServer {
 		this();
 		this.router = new Router();
 		//TODO Load config file
-		Toml toml = new Toml().read(configFile);
-		this.port = toml.getLong(ConfigFile.PORT, ConfigFile.DEFAULT_PORT).intValue();
+		//Toml toml = new Toml().read(configFile);
+		//this.port = toml.getLong(ConfigFile.PORT, ConfigFile.DEFAULT_PORT).intValue();
 		
 	}
 	
@@ -135,7 +135,7 @@ public abstract class WebServer {
 		
 		
 		clientSocket.close();
-		Debug.time("handle_request");
+		Debug.time("handle_request", request.getMethod()+" on '"+request.getPath()+"' processed in {ms} ms.");
 	}
 	
 }

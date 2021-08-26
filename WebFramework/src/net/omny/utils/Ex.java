@@ -11,8 +11,22 @@ public class Ex {
 	 * @return
 	 * @date 08/08/2021
 	 */
-	public static <T> T grab(ExcSupplier<T> supp) {
-		T data = null;
+	public static <T> T grab(ExcSupplier<T> supp){
+		return grab(supp, null);
+	}
+
+	/**
+	 * Catch exception in a fancy way UwU
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param <T>
+	 * @param supp
+	 * @param defaultValue Return value if exception occured
+	 * @return
+	 * @date 08/08/2021
+	 */
+	public static <T> T grab(ExcSupplier<T> supp, T defaultValue) {
+		T data = defaultValue;
 		try {
 			data = supp.get();
 		}catch (Exception e) {
