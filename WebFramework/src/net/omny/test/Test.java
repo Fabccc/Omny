@@ -22,7 +22,7 @@ public class Test extends WebServer{
 	}
 	
 	public Test() {
-		super("conf.toml", SERVICE);
+		super("./conf.toml", SERVICE);
 	}
 	
 	@Override

@@ -26,27 +26,26 @@ public class Router {
 
 	public enum StaticPolicy {
 
-		FOR_EACH_REQUEST,
-		ON_STARTUP_LOAD,
-		REQUEST_AND_LOAD;
+		FOR_EACH_REQUEST, ON_STARTUP_LOAD, REQUEST_AND_LOAD;
 
 		private Consumer<Router> onChoose;
 
-		private StaticPolicy() {}
+		private StaticPolicy() {
+		}
 
 		private StaticPolicy(Consumer<Router> onChoose) {
 			this.onChoose = onChoose;
 		}
 	}
 
-	private List<RouteData> routes = new ArrayList<>();
+	private Map<String, Map<Method, RouteData>> routes = new HashMap<>();
 
 	public Router() {
 
 	}
 
 	public Router route(Router router) {
-		this.routes.addAll(router.routes);
+		this.routes.putAll(router.routes);
 		return this;
 	}
 
@@ -86,8 +85,7 @@ public class Router {
 					if (View.class.isAssignableFrom(returnType)) {
 						// The return type is implementing View interface
 						if (method.getParameterCount() == 2) {
-							if (method.getParameterTypes()[0] == Request.class
-								&& method.getParameterTypes()[1] == Response.class) {
+							if (method.getParameterTypes()[0] == Request.class && method.getParameterTypes()[1] == Response.class) {
 								// Both res and req are present as parameter
 								HTTP annotation = method.getAnnotation(HTTP.class);
 								// We get annotation content
@@ -140,33 +138,44 @@ public class Router {
 	 * @date 22/08/2021
 	 */
 	public Router staticRoute(String staticFolder, StaticPolicy policy) {
-		if (policy == null) return this;
+		if (policy == null)
+			return this;
 		if (policy == StaticPolicy.ON_STARTUP_LOAD) {
 			File rootFolder = new File(staticFolder);
 			if (rootFolder.isFile()) {
 				throw new IllegalArgumentException("Require a folder, file was provide");
 			}
-			for (File subFile : rootFolder.listFiles()) routeFile("", subFile);
+			for (File subFile : rootFolder.listFiles())
+				routeFile("", subFile);
 		}
 		return this;
 	}
 
 	private void routeFile(String path, File file) {
 		if (file.isDirectory()) {
-			for (File subFile : file.listFiles()) routeFile(path + "/" + file.getName(), subFile);
+			for (File subFile : file.listFiles())
+				routeFile(path + "/" + file.getName(), subFile);
 		}
 		Debug.debug("Routing {" + path + "/" + file.getName() + "}");
 		route(path + "/" + file.getName(), new FileRoute(file), Method.GET);
 	}
 
 	public Router route(String path, Route route, Method method) {
-		if(this.routes.stream()
-			.filter(r -> r.getUrl().equals(path) && r.getMethod() == method)
-			.findFirst()
-			.isPresent()){
-				throw new IllegalStateException("A route with this path AND method already exists");
-			}
-		this.routes.add(new RouteData(path, route, method));
+		if (this.routes.containsKey(path)) {
+			// It already contains path with a map
+			if (this.routes.get(path).containsKey(method)) {
+				// It already have a map with same path and same method
+				// we throw exception
+				throw new IllegalStateException("There is already a route with this path AND method");
+			} else
+				// We add this routes
+				this.routes.get(path).put(method, new RouteData(route));
+		} else {
+			// there is no path with this name
+			Map<Method, RouteData> map = new HashMap<>();
+			map.put(method, new RouteData(route));
+			this.routes.put(path, map);
+		}
 		return this;
 	}
 
@@ -176,19 +185,52 @@ public class Router {
 
 	/**
 	 * Handle routing and finding response
+	 * 
 	 * @author Fabien CAYRE (Computer)
 	 *
 	 * @param request The request of the client
-	 * @param client The socket to write to
+	 * @param client  The socket to write to
 	 * @return true if at least one route is the path, false otherwise
 	 * @date 15/08/2021
 	 */
 	public boolean handleRoute(Request request, Socket client) throws IOException {
 
+		// Static routing
+		Map<Method, RouteData> findRoute = null;
+		if ((findRoute = this.routes.get(request.getPath())) != null) {
+			// Here findRoute is not null
+			RouteData routeData = null;
+			if ((routeData = findRoute.get(request.getMethod())) != null) {
+				// Here routeData is not null
+				Route route = routeData.getRoute();
+
+				Response response = new Response(request);
+
+				View view = route.handle(request, response);
+				view.write(response);
+
+				if (response.isBinary()) {
+					Debug.debug("File is binary");
+					client.getOutputStream().write(response.toString().getBytes(StandardCharsets.UTF_8));
+					client.getOutputStream().write(Primitive.toArray(response.getBody()));
+					client.getOutputStream().write("\r\n\r\n".getBytes());
+					client.getOutputStream().flush();
+				} else {
+					BufferedWriter clientWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+					// Writing header
+					// Writing body content
+					// End of HTTP response following the HTTP specs
+					clientWriter.write(response.toString());
+					// Flush the stream
+					clientWriter.flush();
+				}
+				// We leave here, we found a route
+				return true;
+			}
+		}
+
 		// Dynamic routing
-		RouteLoop: for (RouteData path : this.routes) {
-			if(path.getMethod() != request.getMethod())
-				continue;
+		RouteLoop: for (String path : this.routes.keySet()) {
 			// Split the current path to the divison
 			// "/foo/bar/baz" => ["foo", "bar", "baz"]
 			// Used to detect the params in URL
@@ -198,7 +240,7 @@ public class Router {
 			// String"
 
 			// TODO use Regex for better handling
-			String[] division = path.getUrl().split("\\\\");
+			String[] division = path.split("\\\\");
 			String[] currentUrlDivision = request.getPath().split("\\\\");
 
 			// The number of division is different from the current request division
@@ -219,7 +261,11 @@ public class Router {
 					params.put(paramName, paramValue);
 				}
 			}
-
+			RouteData routeData = null;
+			if((routeData = this.routes.get(path).get(request.getMethod())) == null){
+				// Path exist but not with this method
+				continue RouteLoop;
+			}
 			Debug.debug("Found route for " + request.getPath());
 
 			// current division path are the same
@@ -227,7 +273,7 @@ public class Router {
 			request.setParams(params);
 			Response response = new Response(request);
 
-			View view = path.getRoute().handle(request, response);
+			View view = routeData.getRoute().handle(request, response);
 			view.write(response);
 			// The content length of the response body, in bytes
 
