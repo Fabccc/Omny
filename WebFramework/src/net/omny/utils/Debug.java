@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class Debug {
 
-	public static final boolean ENABLE = false;
+	public static boolean ENABLE = true;
 
 	private static ThreadLocal<Map<String, Long>> chronos = new ThreadLocal<>() {
 		@Override
