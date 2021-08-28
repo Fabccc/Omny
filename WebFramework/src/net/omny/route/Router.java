@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import net.omny.route.impl.FileRoute;
+import net.omny.route.impl.LoadedFileRoute;
 import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 import net.omny.utils.Primitive;
@@ -180,7 +181,7 @@ public class Router {
 	}
 
 	public Router route(String path, String filePath) {
-		return route(path, new FileRoute(filePath), Method.GET);
+		return route(path, new LoadedFileRoute(filePath), Method.GET);
 	}
 
 	/**
