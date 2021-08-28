@@ -158,7 +158,7 @@ public class Router {
 				routeFile(path + "/" + file.getName(), subFile);
 		}
 		Debug.debug("Routing {" + path + "/" + file.getName() + "}");
-		route(path + "/" + file.getName(), new FileRoute(file), Method.GET);
+		route(path + "/" + file.getName(), new LoadedFileRoute(file), Method.GET);
 	}
 
 	public Router route(String path, Route route, Method method) {
@@ -181,7 +181,7 @@ public class Router {
 	}
 
 	public Router route(String path, String filePath) {
-		return route(path, new LoadedFileRoute(filePath), Method.GET);
+		return route(path, new FileRoute(filePath), Method.GET);
 	}
 
 	/**
