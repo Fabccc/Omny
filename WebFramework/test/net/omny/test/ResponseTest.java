@@ -24,7 +24,7 @@ public class ResponseTest{
 		response.setResponseCode(Code.E404_NOT_FOUND);
 		response.setHeader("Server", "Nginx");
 		
-		assertEquals("HTTP/1.1 404 Not Found\r\nServer: Nginx\r\nContent-Length: 0\r\n\r\n", response.toString());
+		assertEquals("HTTP/1.1 404 Not Found\r\nServer: Nginx\r\nContent-Length: 0\r\nContent-Type: charset=UTF-8\r\n\r\n", response.toString());
 	}
 	
 	@Test
@@ -48,7 +48,7 @@ public class ResponseTest{
 		});
 		StringBuffer fullHTTPResponse = fakeClientSocket.getBuffer();
 		String resultString = fullHTTPResponse.toString().trim()+"\r\n\r\n";
-		assertEquals("HTTP/1.1 200 OK\r\nServer: Omny\r\nContent-Length: 20\r\n\r\nThis is a text !!!\r\n\r\n", resultString);
+		assertEquals("HTTP/1.1 200 OK\r\nServer: Omny\r\nContent-Length: 20\r\nContent-Type: charset=UTF-8\r\n\r\nThis is a text !!!\r\n\r\n", resultString);
 	}
 	
 }
