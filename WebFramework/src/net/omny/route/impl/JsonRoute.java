@@ -1,5 +1,7 @@
 package net.omny.route.impl;
 
+import com.google.gson.Gson;
+
 import lombok.Getter;
 import net.omny.route.Request;
 import net.omny.route.Response;
@@ -13,7 +15,7 @@ public class JsonRoute implements Route{
   private JsonView view;
 
   private JsonRoute(){
-    this.view = new JsonView();
+    this.view = new JsonView(new Gson());
   }
 
   @Override
