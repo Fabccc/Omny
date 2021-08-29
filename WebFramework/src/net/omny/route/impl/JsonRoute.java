@@ -1,8 +1,5 @@
 package net.omny.route.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import lombok.Getter;
 import net.omny.route.Request;
 import net.omny.route.Response;

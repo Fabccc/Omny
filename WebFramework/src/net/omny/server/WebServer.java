@@ -70,7 +70,6 @@ public abstract class WebServer {
 	}
 	
 	private Router router;
-	private WebServerConfig config;
 	private ExecutorService threadPool;
 	@Getter
 	protected int port = (int) ConfigFile.DEFAULT_PORT;

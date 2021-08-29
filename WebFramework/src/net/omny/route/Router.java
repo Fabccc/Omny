@@ -7,11 +7,8 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import net.omny.route.impl.FileRoute;
 import net.omny.route.impl.LoadedFileRoute;
@@ -29,13 +26,7 @@ public class Router {
 
 		FOR_EACH_REQUEST, ON_STARTUP_LOAD, REQUEST_AND_LOAD;
 
-		private Consumer<Router> onChoose;
-
 		private StaticPolicy() {
-		}
-
-		private StaticPolicy(Consumer<Router> onChoose) {
-			this.onChoose = onChoose;
 		}
 	}
 

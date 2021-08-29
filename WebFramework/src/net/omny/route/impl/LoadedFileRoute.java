@@ -3,7 +3,6 @@ package net.omny.route.impl;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import net.omny.route.Request;
 import net.omny.route.Response;
