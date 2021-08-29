@@ -52,6 +52,7 @@ public abstract class WebServer {
 		webServer.threadPool.submit(() -> {
 			// Run the server
 			try (ServerSocket serverSocket = new ServerSocket(webServer.port)) {
+				Debug.debug("Thread pool has "+webServer.threadPoolSize+" threads.");
 				Debug.debug("Listening on port "+webServer.port);
 				webServer.running.set(true);
 				while (webServer.running.get()) {
@@ -75,6 +76,8 @@ public abstract class WebServer {
 	protected int port = (int) ConfigFile.DEFAULT_PORT;
 	@Getter 
 	private final AtomicBoolean running = new AtomicBoolean(false);
+	@Getter
+	private int threadPoolSize;
 	
 	public WebServer(String configFile) {
 		this();
@@ -82,7 +85,14 @@ public abstract class WebServer {
 		//TODO Load config file
 		Toml toml = new Toml().read(new File(configFile));
 		this.port = toml.getLong(ConfigFile.PORT, ConfigFile.DEFAULT_PORT).intValue();
-		
+
+		int threadCount = toml.getLong(ConfigFile.THREAD_COUNT, -1L).intValue();
+		if(threadCount == -1){
+			// Determine number of thread depending on system capabilities
+			threadCount = Runtime.getRuntime().availableProcessors() / 2;
+		}
+		this.threadPool = Executors.newScheduledThreadPool(threadCount);
+		this.threadPoolSize = threadCount;
 	}
 	
 	public WebServer(String configFile, ExecutorService threadPool) {
