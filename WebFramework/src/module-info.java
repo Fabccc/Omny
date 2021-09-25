@@ -1,5 +1,6 @@
 module webframework {
 	exports net.omny.route;
+	exports net.omny.route.handlers;
 	exports net.omny.views;
 	exports net.omny.test;
 	exports net.omny.server;
