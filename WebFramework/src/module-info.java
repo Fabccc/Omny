@@ -7,7 +7,7 @@ module webframework {
 	requires lombok;
 	requires toml4j;
 	requires org.apache.commons.lang3;
-	requires com.google.gson;
+	requires transitive com.google.gson;
 	
 	// Unit testing
 	//requires org.junit.jupiter.engine;
