@@ -8,11 +8,13 @@ import java.lang.reflect.Field;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import lombok.Getter;
+import net.omny.route.handlers.DefaultHandler;
 import net.omny.route.handlers.PriorityHandler;
 import net.omny.route.handlers.RequestHandler;
 import net.omny.route.impl.FileRoute;
@@ -38,10 +40,14 @@ public class Router {
 	@Getter
 	private Map<String, Map<Method, RouteData>> routes = new HashMap<>();
 	@Getter
-	private Map<PriorityHandler, List<RequestHandler>> handlers = new HashMap<>();
+	private EnumMap<PriorityHandler, List<RequestHandler>> handlers = 
+		new EnumMap<>(PriorityHandler.class);
 
 	public Router() {
-
+		// By default
+		// This default handler handle static routing
+		// And non-params URL dependent
+		handler(new DefaultHandler());
 	}
 
 	// =========================================
@@ -234,7 +240,16 @@ public class Router {
 	 */
 	public boolean handleRoute(Request request, Socket client) throws IOException {
 
-		
+		// Processing request handlers...
+		for(PriorityHandler priority : this.handlers.keySet()){
+			for(RequestHandler handler : this.handlers.get(priority)){
+				if(handler.handle(this, request, client))
+					// If handler returns true
+					// Then we must stop processing more
+					return true;
+			}
+		}
+
 
 		// Dynamic routing
 		RouteLoop: for (String path : this.routes.keySet()) {
@@ -305,6 +320,7 @@ public class Router {
 			return true;
 		}
 		// Returning a 404 Not Found
+		//IT'S VERY IMPORTANT, IT MUST STAY AT THE END OF EVERY ROUTES
 		Response response = new Response(request);
 		response.setResponseCode(Code.E404_NOT_FOUND);
 
