@@ -7,9 +7,14 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import lombok.Getter;
+import net.omny.route.handlers.PriorityHandler;
+import net.omny.route.handlers.RequestHandler;
 import net.omny.route.impl.FileRoute;
 import net.omny.route.impl.LoadedFileRoute;
 import net.omny.utils.Debug;
@@ -30,14 +35,21 @@ public class Router {
 		}
 	}
 
+	@Getter
 	private Map<String, Map<Method, RouteData>> routes = new HashMap<>();
+	@Getter
+	private Map<PriorityHandler, List<RequestHandler>> handlers = new HashMap<>();
 
 	public Router() {
 
 	}
 
+	// =========================================
+	// Routing functions
+
 	public Router route(Router router) {
 		this.routes.putAll(router.routes);
+		this.handlers.putAll(router.handlers);
 		return this;
 	}
 
@@ -66,7 +78,6 @@ public class Router {
 	 * @date 17/08/2021
 	 */
 	public Router route(Object object) {
-		// TODO Find all routes, using annotations
 		Class<?> clazz = object.getClass();
 
 		for (java.lang.reflect.Method method : clazz.getDeclaredMethods()) {
@@ -175,6 +186,42 @@ public class Router {
 		return route(path, new FileRoute(filePath), Method.GET);
 	}
 
+
+	// =========================================
+	// Handlers functions
+
+	/**
+	 * Add an handler to the current list of request handlers
+	 * 
+	 * @param handler The request handler
+	 * @return The router object
+	 */
+	public Router handler(RequestHandler handler){
+		return handler(handler, PriorityHandler.DEFAULT);
+	}
+
+
+	/**
+	 * Add an handler to the current list of request handlers with priority defined
+	 * @param handler The request handler
+	 * @param priority The priority of this handler
+	 * @return The router object
+	 */
+	public Router handler(RequestHandler handler, PriorityHandler priority){
+		if(this.handlers.containsKey(priority)){
+			// This priority already exists and there is a list linked to
+			this.handlers.get(priority).add(handler);
+		}else{
+			// This priority doesn't exists
+			// We must create a new List containing the handler
+			// Then put it to this priority
+			List<RequestHandler> list = new ArrayList<>();
+			list.add(handler);
+			this.handlers.put(priority, list);
+		}
+		return this;
+	}
+
 	/**
 	 * Handle routing and finding response
 	 * 
@@ -187,39 +234,7 @@ public class Router {
 	 */
 	public boolean handleRoute(Request request, Socket client) throws IOException {
 
-		// Static routing
-		Map<Method, RouteData> findRoute = null;
-		if ((findRoute = this.routes.get(request.getPath())) != null) {
-			// Here findRoute is not null
-			RouteData routeData = null;
-			if ((routeData = findRoute.get(request.getMethod())) != null) {
-				// Here routeData is not null
-				Route route = routeData.getRoute();
-
-				Response response = new Response(request);
-
-				View view = route.handle(request, response);
-				view.write(response);
-
-				if (response.isBinary()) {
-					Debug.debug("File is binary");
-					client.getOutputStream().write(response.toString().getBytes(StandardCharsets.UTF_8));
-					client.getOutputStream().write(Primitive.toArray(response.getBody()));
-					client.getOutputStream().write("\r\n\r\n".getBytes());
-					client.getOutputStream().flush();
-				} else {
-					BufferedWriter clientWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-					// Writing header
-					// Writing body content
-					// End of HTTP response following the HTTP specs
-					clientWriter.write(response.toString());
-					// Flush the stream
-					clientWriter.flush();
-				}
-				// We leave here, we found a route
-				return true;
-			}
-		}
+		
 
 		// Dynamic routing
 		RouteLoop: for (String path : this.routes.keySet()) {
