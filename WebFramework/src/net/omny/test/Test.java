@@ -15,6 +15,14 @@ import net.omny.views.View;
 
 public class Test extends WebServer{
 
+
+	/*
+	Brian Goetz in his famous book "Java Concurrency in Practice" recommends the following formula:
+
+	Number of threads = Number of Available Cores * (1 + Wait time / Service time)
+
+	*/
+
 	private static final ExecutorService SERVICE = Executors.newScheduledThreadPool(6);
 	
 	public static void main(String[] args) {

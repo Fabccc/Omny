@@ -108,6 +108,18 @@ public abstract class WebServer {
 		// -> FUTURE : handling middleware
 		route(this.router);
 	}
+
+	/**
+	 * Perform background task
+	 * Submit the runnable in the Thread Pool from webserver
+	 * 
+	 * @param runnable The function to run in background
+	 */
+	public void background(Runnable runnable){
+		this.threadPool
+			.submit(runnable);
+	}
+
 	
 	/**
 	 * Initializing routes for the webserver
