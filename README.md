@@ -6,17 +6,17 @@ Framework java pour serveur web léger
 
 ```java
 
-class Test{
+class HTTPServer{
     public static void main(String[] args) {
-		launch(new Test());
+		launch(new HTTPServer());
 	}
 
-	public Test() {
-		super("./conf.toml", SERVICE);
+	public HTTPServer() {
+		super("./conf.toml");
 	}
 
     @HTTP(url = "/")
-		public Route indexRoute = new FileRoute("index.html");
+	public Route indexRoute = new FileRoute("index.html");
 
     @HTTP(url = "/test")
 	public View index(Request req, Response res) {
@@ -27,7 +27,7 @@ class Test{
 	@Override
 	public void route(Router router) {
 		router.route(this);
-		router.staticRoute("./static");
+		router.staticRoute("./static"); // Static file routing (eg: png, jpg, xml files)
 	}
 }    
 ```
