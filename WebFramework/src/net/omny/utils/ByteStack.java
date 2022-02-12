@@ -1,13 +1,12 @@
 package net.omny.utils;
 
-import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * 
@@ -16,7 +15,7 @@ import java.util.NoSuchElementException;
  * 
  * @author Fabien CAYRE
  */
-public class ByteStack {
+public class ByteStack implements Iterable<Byte> {
 
     private static final int DEFAULT_CAPACITY = 10;
     private static final int DEFAULT_GROW_CAPACITY = 16;
@@ -65,7 +64,7 @@ public class ByteStack {
     }
 
     private byte[] grow() {
-        return grow(size + 16);
+        return grow(size + DEFAULT_GROW_CAPACITY);
     }
 
     public void trimToSize() {
@@ -75,6 +74,30 @@ public class ByteStack {
                     ? EMPTY_ELEMENTDATA
                     : Arrays.copyOf(this.array, size);
         }
+    }
+
+    /**
+     * A version of rangeCheck used by add and addAll.
+     */
+    private void rangeCheckForAdd(int index) {
+        if (index > size || index < 0)
+            throw new IndexOutOfBoundsException(outOfBoundsMsg(index));
+    }
+
+    /**
+     * Constructs an IndexOutOfBoundsException detail message.
+     * Of the many possible refactorings of the error handling code,
+     * this "outlining" performs best with both server and client VMs.
+     */
+    private String outOfBoundsMsg(int index) {
+        return "Index: " + index + ", Size: " + size;
+    }
+
+    /**
+     * A version used in checking (fromIndex > toIndex) condition
+     */
+    private static String outOfBoundsMsg(int fromIndex, int toIndex) {
+        return "From Index: " + fromIndex + " > To Index: " + toIndex;
     }
 
     /**
@@ -155,24 +178,41 @@ public class ByteStack {
         this.array[index] = element;
     }
 
-    public void add(int index, Byte element) {
-        // TODO Auto-generated method stub
+    public void add(int index, byte element) {
+        rangeCheckForAdd(index);
+        modificationCount++;
+        final int s;
+        byte[] elementData;
+        if ((s = size) == (elementData = this.array).length)
+            elementData = grow();
+        System.arraycopy(elementData, index,
+                elementData, index + 1,
+                s - index);
+        elementData[index] = element;
+        size = s + 1;
 
     }
 
-    public Byte remove(int index) {
-        // TODO Auto-generated method stub
-        return null;
+    /**
+     * Private remove method that skips bounds checking and does not
+     * return the value removed.
+     */
+    private void fastRemove(byte[] es, int i) {
+        modificationCount++;
+        final int newSize;
+        if ((newSize = size - 1) > i)
+            System.arraycopy(es, i + 1, es, i, newSize - i);
+        es[size = newSize] = 0;
     }
 
-    public int indexOf(Object o) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
+    public byte remove(int index) {
+        Objects.checkIndex(index, size);
+        final byte[] es = array;
 
-    public int lastIndexOf(Object o) {
-        // TODO Auto-generated method stub
-        return 0;
+        byte oldValue = (byte) es[index];
+        fastRemove(es, index);
+
+        return oldValue;
     }
 
     public ListIterator<Byte> listIterator() {
@@ -183,18 +223,14 @@ public class ByteStack {
         return new ByteStackListIterator(index);
     }
 
-    public List<Byte> subList(int fromIndex, int toIndex) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    private class ByteStackIterator implements Iterator<Byte>{
+    private class ByteStackIterator implements Iterator<Byte> {
 
         int cursor;
         int expectedModCount = ByteStack.this.modificationCount;
         int lastRet = -1;
 
-        ByteStackIterator() {}
+        ByteStackIterator() {
+        }
 
         @Override
         public boolean hasNext() {
@@ -219,11 +255,10 @@ public class ByteStack {
             if (ByteStack.this.modificationCount != expectedModCount)
                 throw new ConcurrentModificationException();
         }
-        
+
     }
 
     private class ByteStackListIterator extends ByteStackIterator implements ListIterator<Byte> {
-
 
         public ByteStackListIterator(int index) {
             super();
@@ -301,8 +336,6 @@ public class ByteStack {
                 throw new ConcurrentModificationException();
             }
         }
-
-        
 
     }
 
