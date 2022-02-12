@@ -102,8 +102,7 @@ public class ByteStack {
     }
 
     public Iterator<Byte> iterator() {
-        // TODO Auto-generated method stub
-        return null;
+        return new ByteStackIterator();
     }
 
     /**
@@ -177,13 +176,11 @@ public class ByteStack {
     }
 
     public ListIterator<Byte> listIterator() {
-        // TODO Auto-generated method stub
-        return null;
+        return listIterator(0);
     }
 
     public ListIterator<Byte> listIterator(int index) {
-        // TODO Auto-generated method stub
-        return null;
+        return new ByteStackListIterator(index);
     }
 
     public List<Byte> subList(int fromIndex, int toIndex) {
@@ -191,15 +188,13 @@ public class ByteStack {
         return null;
     }
 
-    private class ByteStackIterator implements ListIterator<Byte> {
+    private class ByteStackIterator implements Iterator<Byte>{
 
         int cursor;
         int expectedModCount = ByteStack.this.modificationCount;
         int lastRet = -1;
 
-        public ByteStackIterator(int index) {
-            this.cursor = index;
-        }
+        ByteStackIterator() {}
 
         @Override
         public boolean hasNext() {
@@ -218,6 +213,21 @@ public class ByteStack {
                 throw new ConcurrentModificationException();
             this.cursor = localCursor + 1;
             return elementData[lastRet = localCursor];
+        }
+
+        final void checkForComodification() {
+            if (ByteStack.this.modificationCount != expectedModCount)
+                throw new ConcurrentModificationException();
+        }
+        
+    }
+
+    private class ByteStackListIterator extends ByteStackIterator implements ListIterator<Byte> {
+
+
+        public ByteStackListIterator(int index) {
+            super();
+            this.cursor = index;
         }
 
         @Override
@@ -292,10 +302,7 @@ public class ByteStack {
             }
         }
 
-        final void checkForComodification() {
-            if (ByteStack.this.modificationCount != expectedModCount)
-                throw new ConcurrentModificationException();
-        }
+        
 
     }
 
