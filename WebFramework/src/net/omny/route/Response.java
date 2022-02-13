@@ -87,23 +87,23 @@ public class Response {
 	
 	public void addBody(String value) {
 		for(byte b : value.getBytes())
-			this.body.add(b);
+			body.push(b);
 	}
 	
 	public void addBody(byte[] value) {
 		for(byte b : value)
-			this.body.add(b);
+			body.push(b);
 	}
 	
 	public void addBody(byte value) {
-		this.body.add(value);
+		body.push(value);
 	}
 	
 	public void addBody(char value) {
 		byte first = (byte) (value >> 2);
 		byte sec = (byte) value;
-		this.body.add(first);
-		this.body.add(sec);
+		body.push(first);
+		body.push(sec);
 	}
 
 	public String realToString(){
