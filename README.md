@@ -1,8 +1,11 @@
 # Omny Web Framework
 
-Framework java pour serveur web léger
+Java lightweight web serverside framework
 
-### Exemple de code
+
+## Microbenching test can be found under `jmh-test/` folder
+[Microbenching README.MD](jmh-test/README.md)
+## Example
 
 ```java
 
@@ -31,3 +34,4 @@ class HTTPServer{
 	}
 }    
 ```
+
