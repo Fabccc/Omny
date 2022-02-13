@@ -1,4 +1,4 @@
-package net.omny.test;
+package net.omny.utils;
 
 import java.util.concurrent.TimeUnit;
 

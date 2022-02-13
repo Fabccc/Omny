@@ -8,6 +8,9 @@
 	<properties>
 		<lombok.version>1.18.20</lombok.version>
 		<lombokcompiler.version>1.18.20.0</lombokcompiler.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<java.version>17</java.version>
 	</properties>
 
 	<build>
@@ -15,11 +18,9 @@
 		<testSourceDirectory>test</testSourceDirectory>
 		<plugins>
 			<plugin>
-
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.8.1</version>
 				<configuration>
-					<release>11</release>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
@@ -68,6 +69,17 @@
 			<artifactId>junit</artifactId>
 			<version>4.13.2</version>
 			<scope>test</scope>
+		</dependency>
+		<!-- PERFORMANCES TESTING !-->
+		<dependency>
+			<groupId>org.openjdk.jmh</groupId>
+			<artifactId>jmh-core</artifactId>
+			<version>1.33</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjdk.jmh</groupId>
+			<artifactId>jmh-generator-annprocess</artifactId>
+			<version>1.33</version>
 		</dependency>
 	</dependencies>
 </project>
