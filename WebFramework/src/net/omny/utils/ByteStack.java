@@ -142,6 +142,10 @@ public class ByteStack implements List<Byte> {
         return Arrays.copyOf(this.array, size);
     }
 
+    public byte[] getBackedArray(){
+        return this.array;
+    }
+
     public boolean push(byte e) {
         return add(e);
     }

@@ -31,16 +31,7 @@ public class ArrayVsListPerf {
         bList.add((byte) (i%255));
       }
     });
-    PerformanceTest.printRecap("ByteStack::toArray", () -> {
-      for(int i = 0; i < 100; i++){
-        bStack.toArray();
-      }
-    });
-    PerformanceTest.printRecap("ArrayList::toArray", () -> {
-      for(int i = 0; i < 100; i++){
-        bList.toArray();
-      }
-    });
+    
   }
 
 }

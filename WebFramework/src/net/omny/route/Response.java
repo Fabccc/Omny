@@ -12,7 +12,6 @@ import lombok.Setter;
 import net.omny.utils.ByteStack;
 import net.omny.utils.HTTPUtils;
 import net.omny.utils.HTTPUtils.Version;
-import net.omny.utils.Primitive;
 
 public class Response {
 
@@ -141,7 +140,7 @@ public class Response {
 			return fullText.toString();
 		}
 		if(!this.binary) {
-			fullText.append(new String(Primitive.toArray(this.body)));
+			fullText.append(new String(this.body.getBackedArray()));
 			fullText.append("\r\n");
 		}
 		
