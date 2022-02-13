@@ -1,7 +1,10 @@
 # Omny JMH Test 
 ## Testing implementation using OpenJDK Java Microbenchmark Harness
 
-Comparing ArrayList, Stack (from the JDK17) and ByteStack (my own datastruct, here named NATIVESTACK)
+#### Comparing ArrayList, Stack (from the JDK17) and ByteStack (my own datastruct, here named NATIVESTACK)
+
+This datastructure is used in the framework in order to write into the response buffer.
+it act as a resizable byte buffer.
 
 This operation consist of two method call, repeated `size` times.
 ```java
