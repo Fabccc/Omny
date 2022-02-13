@@ -40,10 +40,12 @@ public class ByteStack implements List<Byte> {
         this.size = array.length;
     }
 
+    @Override
     public int size() {
         return this.array.length;
     }
 
+    @Override
     public boolean isEmpty() {
         return this.size == 0;
     }
@@ -100,13 +102,6 @@ public class ByteStack implements List<Byte> {
     }
 
     /**
-     * A version used in checking (fromIndex > toIndex) condition
-     */
-    private static String outOfBoundsMsg(int fromIndex, int toIndex) {
-        return "From Index: " + fromIndex + " > To Index: " + toIndex;
-    }
-
-    /**
      * This helper method split out from add(E) to keep method
      * bytecode size under 35 (the -XX:MaxInlineSize default value),
      * which helps when add(E) is called in a C1-compiled loop.
@@ -142,7 +137,7 @@ public class ByteStack implements List<Byte> {
         return Arrays.copyOf(this.array, size);
     }
 
-    public byte[] getBackedArray(){
+    public byte[] getBackedArray() {
         return this.array;
     }
 
@@ -150,31 +145,49 @@ public class ByteStack implements List<Byte> {
         return add(e);
     }
 
+    /**
+     * @deprecated Non-sense in a byte stack data structure
+     */
+    @Override
     public boolean containsAll(Collection<?> c) {
         nonSense();
         return false;
     }
 
+    @Override
     public boolean addAll(Collection<? extends Byte> c) {
         c.forEach(this::add);
         return true;
     }
 
+    /**
+     * @deprecated Non-sense in a byte stack data structure
+     */
+    @Override
     public boolean addAll(int index, Collection<? extends Byte> c) {
         nonSense();
         return false;
     }
 
+    /**
+     * @deprecated Non-sense in a byte stack data structure
+     */
+    @Override
     public boolean removeAll(Collection<?> c) {
         nonSense();
         return false;
     }
 
+    /**
+     * @deprecated Non-sense in a byte stack data structure
+     */
+    @Override
     public boolean retainAll(Collection<?> c) {
         nonSense();
         return false;
     }
 
+    @Override
     public void clear() {
         modificationCount++;
         this.array = new byte[DEFAULT_CAPACITY];
@@ -362,6 +375,9 @@ public class ByteStack implements List<Byte> {
 
     }
 
+    /**
+     * @deprecated Non-sense in a byte stack data structure
+     */
     @Override
     public boolean contains(Object o) {
         nonSense();
