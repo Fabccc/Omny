@@ -83,8 +83,8 @@ public class ArrayVsByteStack {
 
     @Benchmark
     @Fork(1)
-    @Warmup(iterations = 1, time = 3)
-    @Measurement(iterations = 10, time = 3)
+    @Warmup(iterations = 1, time = 2)
+    @Measurement(iterations = 5, time = 2)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     public void pushAndPop() {
