@@ -1,0 +1,10 @@
+/bin/
+/target/
+/index.html
+/.factorypath
+/.apt_generated/
+/.apt_generated_tests/
+/static/
+/loulou.json
+/.vscode/
+.classpath
