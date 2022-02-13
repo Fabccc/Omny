@@ -1,9 +1,7 @@
 package net.omny.route;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -11,8 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.omny.utils.HTTPUtils.Version;
+import net.omny.utils.ByteStack;
 import net.omny.utils.HTTPUtils;
+import net.omny.utils.HTTPUtils.Version;
 import net.omny.utils.Primitive;
 
 public class Response {
@@ -32,7 +31,7 @@ public class Response {
 	private Version httpVersion = HTTPUtils.Version.V1_1;
 	private Map<String, String> headers = new HashMap<>();
 	@Getter
-	private List<Byte> body = new ArrayList<>();
+	private ByteStack body = new ByteStack();
 	@Getter @Setter
 	private boolean binary;
 
