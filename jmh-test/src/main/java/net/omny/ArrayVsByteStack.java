@@ -46,6 +46,7 @@ import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -82,18 +83,29 @@ public class ArrayVsByteStack {
 
     @Benchmark
     @Fork(1)
-    @Warmup(iterations = 1)
-    @Measurement(iterations = 10)
+    @Warmup(iterations = 1, time = 3)
+    @Measurement(iterations = 10, time = 3)
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
     public void pushAndPop() {
-        var list = createBytes();
-        pushAndPop(list);
+        pushAndPop(createBytes());
     }
 
     private void pushAndPop(List<Byte> bytes) {
         for (int i = 0; i < this.size; i++) {
-            bytes.add((byte) 69);
+            /*
+             * The problem with java is that it wrap this byte in an Object primitive
+             * wrapper (java.lang.Byte).
+             * as List is an interface, my implementation need to declare the add method
+             * with the Object wrapper.
+             * but my implementation has a method that accept a primitive byte type.
+             * This is why i'm using a instance type checking
+             */
+            if (bytes instanceof ByteStack stack) {
+                stack.push((byte) 69);
+            } else {
+                bytes.add((byte) 69);
+            }
             bytes.remove(0);
         }
     }
