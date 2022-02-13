@@ -1,3 +1,14 @@
 {
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/.apt**": true,
+    "bin/": true,
+    "target/": true
+  },
+
   "java.configuration.updateBuildConfiguration": "automatic"
 }
