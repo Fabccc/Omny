@@ -49,11 +49,17 @@ public enum Code {
 	@Getter
 	private int code;
 	@Getter
+	private final byte[] codeStringAsByte;
+	@Getter
 	private String responseText;
+	@Getter
+	private final byte[] responseAsByte;
 	
 	private Code(int code, String responseText) {
 		this.code = code;
+		this.codeStringAsByte = Integer.toString(code).getBytes();
 		this.responseText = responseText;
+		this.responseAsByte = this.responseText.getBytes();
 	}
 
 	private Code(int code) {

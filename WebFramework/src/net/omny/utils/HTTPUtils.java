@@ -21,14 +21,23 @@ public class HTTPUtils {
 		}
 		
 		@Getter
-		private String tag;
+		private final String tag;
+		@Getter 
+		private final byte[] tagAsByte;
 
 		private Version(String tag) {
 			this.tag = tag;
+			this.tagAsByte = this.tag.getBytes();
 		}
 		
 	}
 	
+	public static final String CRLF = "\r\n";
+	public static final byte[] CRLF_AS_BYTES = CRLF.getBytes();
+	public static final String DOUBLE_CRLF = "\r\n\r\n";
+	public static final byte[] DOUBLE_CRLF_AS_BYTES = DOUBLE_CRLF.getBytes();
+	public static final byte SPACE_AS_BYTE = ' ';
+
 	private static final Map<String, String> MIMES_TYPES = new HashMap<>();
 	
 	static {

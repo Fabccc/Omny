@@ -154,6 +154,12 @@ public class ByteStack implements List<Byte> {
         return false;
     }
 
+    public void addAllBytes(byte[] b) {
+        // TODO optimze this method
+        for(byte bb : b)
+            push(bb);
+    }
+
     @Override
     public boolean addAll(Collection<? extends Byte> c) {
         c.forEach(this::add);

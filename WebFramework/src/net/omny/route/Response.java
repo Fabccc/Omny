@@ -109,6 +109,29 @@ public class Response {
 	public String realToString(){
 		return "Response {httpVersion: "+this.httpVersion+", responseCode: "+this.responseCode.getCode()+", responseText: "+this.responseCode.getResponseText()+" }";
 	}
+
+	public byte[] toStringAsByte(){
+		// TODO 
+		ByteStack byteStack = new ByteStack(48);
+		byteStack.addAllBytes(this.httpVersion.getTagAsByte());
+		byteStack.add(HTTPUtils.SPACE_AS_BYTE);
+		byteStack.addAllBytes(this.responseCode.getCodeStringAsByte());
+		byteStack.add(HTTPUtils.SPACE_AS_BYTE);
+		byteStack.addAllBytes(this.responseCode.getResponseAsByte());
+		byteStack.addAllBytes(HTTPUtils.CRLF_AS_BYTES);
+		if(this.body.size() == 0) {
+			return byteStack.getBackedArray();
+		}
+		// TODO HEADERS
+		// TODO 
+
+		if(!this.binary){
+			byteStack.addAllBytes(this.body.getBackedArray());
+			byteStack.addAllBytes(HTTPUtils.CRLF_AS_BYTES);
+		}
+
+		return byteStack.getBackedArray();
+	}
 	
 	@Override
 	public String toString() {
