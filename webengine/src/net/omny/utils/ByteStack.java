@@ -42,7 +42,7 @@ public class ByteStack implements List<Byte> {
 
     @Override
     public int size() {
-        return this.array.length;
+        return size;
     }
 
     @Override
