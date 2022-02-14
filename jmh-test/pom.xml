@@ -38,6 +38,13 @@ THE POSSIBILITY OF SUCH DAMAGE.
     <version>1.0</version>
     <packaging>jar</packaging>
 
+    <!--The identifier of the parent POM-->
+	<parent>
+		<groupId>net.omny</groupId>
+		<artifactId>webframework</artifactId>
+		<version>0.0.1</version>
+	</parent>
+
     <name>JMH benchmark sample: Java</name>
 
     <!--

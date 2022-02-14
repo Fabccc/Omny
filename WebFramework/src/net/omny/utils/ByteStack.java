@@ -32,7 +32,7 @@ public class ByteStack implements List<Byte> {
 
     public ByteStack(int defaultCapacity) {
         this.array = new byte[defaultCapacity];
-        this.size = defaultCapacity;
+        this.size = 0;
     }
 
     public ByteStack(byte[] backedArray) {
@@ -145,6 +145,10 @@ public class ByteStack implements List<Byte> {
         return add(e);
     }
 
+    public void push(byte[] array){
+        this.addAllBytes(array);
+    }
+
     /**
      * @deprecated Non-sense in a byte stack data structure
      */
@@ -154,10 +158,16 @@ public class ByteStack implements List<Byte> {
         return false;
     }
 
-    public void addAllBytes(byte[] b) {
-        // TODO optimze this method
-        for(byte bb : b)
-            push(bb);
+    public void addAllBytes(byte[] bytes) {
+        int insertAt = this.size;
+        int arrLength = bytes.length;
+        grow(size + arrLength);
+        System.arraycopy(bytes, 0, this.array, insertAt, arrLength);
+    }
+
+    public void addAllBytesSlow(byte[] bytes) {
+        for (byte b : bytes)
+            push(b);
     }
 
     @Override
@@ -204,7 +214,6 @@ public class ByteStack implements List<Byte> {
         return this.array[index];
     }
 
-    @SuppressWarnings("unchecked")
     byte at(int index) {
         return array[index];
     }
@@ -400,6 +409,7 @@ public class ByteStack implements List<Byte> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] a) {
         Byte[] elementData = (Byte[]) toArray();
         if (a.length < size)
