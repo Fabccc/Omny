@@ -49,6 +49,7 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
@@ -72,6 +73,10 @@ public class ArrayVsByteStack {
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
                 .include(ArrayVsByteStack.class.getSimpleName())
+                
+            .shouldDoGC(true)
+            .resultFormat(ResultFormatType.TEXT)
+            .result("benchmark-result/BStack_" + System.currentTimeMillis() + ".txt")
                 .forks(1).build();
 
         new Runner(opt).run();

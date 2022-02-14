@@ -7,4 +7,5 @@
 /static/
 /loulou.json
 /.vscode/
+/benchmark-result/
 .classpath
