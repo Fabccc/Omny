@@ -32,6 +32,7 @@
 package net.omny;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.TimeUnit;
@@ -39,11 +40,13 @@ import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Param;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.Runner;
@@ -52,6 +55,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import net.omny.utils.ByteStack;
+import net.omny.utils.Primitive;
 
 @State(Scope.Benchmark)
 public class ArrayVsByteStack {
@@ -61,6 +65,9 @@ public class ArrayVsByteStack {
 
     @Param({ "1000", "10000", "100000" })
     public int size;
+
+    private byte[] arr;
+    private List<Byte> arr2;
 
     public static void main(String[] args) throws RunnerException {
         Options opt = new OptionsBuilder()
@@ -80,6 +87,16 @@ public class ArrayVsByteStack {
         }
     }
 
+    @Setup(Level.Iteration)
+    public void setup(){
+        int initialLength = this.size / 2;
+        byte[] toPush = new byte[initialLength];
+        Arrays.fill(toPush, (byte) 35);
+        this.arr = toPush;
+        this.arr2 = Primitive.toList(toPush);
+
+    }
+
     @Benchmark
     @Fork(1)
     @Warmup(iterations = 1, time = 2)
@@ -90,21 +107,52 @@ public class ArrayVsByteStack {
         pushAndPop(createBytes());
     }
 
+    @Benchmark
+    @Fork(1)
+    @Warmup(iterations = 1, time = 2)
+    @Measurement(iterations = 5, time = 2)
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    public void addAll() {
+        addAll(createBytes());
+    }
+
+    private void push(List<Byte> bytes) {
+        /*
+         * The problem with java is that it wrap this byte in an Object primitive
+         * wrapper (java.lang.Byte).
+         * as List is an interface, my implementation need to declare the add method
+         * with the Object wrapper.
+         * but my implementation has a method that accept a primitive byte type.
+         * This is why i'm using a instance type checking
+         */
+        if (bytes instanceof ByteStack stack) {
+            stack.push((byte) 69);
+        } else {
+            bytes.add((byte) 69);
+        }
+    }
+
+    private void addAll(List<Byte> bytes) {
+        // Fill the initial array 
+        for(int i = 0; i < size / 2-1; i++){
+            push(bytes);
+        }
+        // Merge
+        merge(bytes);
+    }
+
+    private void merge(List<Byte> bytes){
+        if (bytes instanceof ByteStack stack) {
+            stack.push(this.arr);
+        } else {
+            bytes.addAll(this.arr2);
+        }
+    }
+
     private void pushAndPop(List<Byte> bytes) {
         for (int i = 0; i < this.size; i++) {
-            /*
-             * The problem with java is that it wrap this byte in an Object primitive
-             * wrapper (java.lang.Byte).
-             * as List is an interface, my implementation need to declare the add method
-             * with the Object wrapper.
-             * but my implementation has a method that accept a primitive byte type.
-             * This is why i'm using a instance type checking
-             */
-            if (bytes instanceof ByteStack stack) {
-                stack.push((byte) 69);
-            } else {
-                bytes.add((byte) 69);
-            }
+            push(bytes);
             bytes.remove(0);
         }
     }

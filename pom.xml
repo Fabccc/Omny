@@ -4,6 +4,11 @@
   <artifactId>webframework</artifactId>
   <version>0.0.1</version>
   <packaging>pom</packaging>
+  
+	<modules>
+		<module>webengine</module>
+		<module>jmh-test</module>
+	</modules>
 
 
   <properties>
