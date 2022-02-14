@@ -6,5 +6,4 @@
 /.apt_generated_tests/
 /static/
 /loulou.json
-/.vscode/
 .classpath
