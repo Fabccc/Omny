@@ -110,8 +110,15 @@ public class Response {
 		return "Response {httpVersion: "+this.httpVersion+", responseCode: "+this.responseCode.getCode()+", responseText: "+this.responseCode.getResponseText()+" }";
 	}
 
+	/**
+	 * 
+	 * Return the response as a byte array
+	 * Better than {@link Response#toString()} because we write to byte buffer instead of 
+	 * writing to a String Builder and then convert it to bytes
+	 * 
+	 * @return the response as a byte array
+	 */
 	public byte[] toStringAsByte(){
-		// TODO 
 		ByteStack byteStack = new ByteStack(48);
 		byteStack.addAllBytes(this.httpVersion.getTagAsByte());
 		byteStack.add(HTTPUtils.SPACE_AS_BYTE);
@@ -122,8 +129,27 @@ public class Response {
 		if(this.body.size() == 0) {
 			return byteStack.getBackedArray();
 		}
-		// TODO HEADERS
-		// TODO 
+		if(!this.headers.containsKey("server")) {
+			setHeader("server", "Omny");
+		}
+		
+		if(!this.headers.containsKey("Content-Length")) {
+			setHeader("content-length", String.valueOf(this.body.size()));
+		}
+		if(!this.binary) {
+			appendHeader("content-type", "charset=UTF-8");
+		}
+		for(String header : this.headers.keySet()) {
+			String value = this.headers.get(header);
+			
+			// TODO Maybe better way to capitalize
+			String capitalized = Arrays.stream(header.split("\\-"))
+				.map(StringUtils::capitalize)
+				.collect(Collectors.joining("-"));
+			String fullHeaderLine = capitalized+": "+value;
+			byteStack.addAllBytes(fullHeaderLine.getBytes());
+			byteStack.addAllBytes(HTTPUtils.CRLF_AS_BYTES);
+		}
 
 		if(!this.binary){
 			byteStack.addAllBytes(this.body.getBackedArray());
