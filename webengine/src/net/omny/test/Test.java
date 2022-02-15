@@ -45,10 +45,10 @@ public class Test extends WebServer{
 	public static class TestRouter {
 		
 		@HTTP(url = "/")
-		public Route indexRoute = new LoadedFileRoute("webengine/index.html");
+		public Route indexRoute = new FileRoute("webengine/index.html");
 
 		@HTTP(url = "/loulou")
-		public Route fileRoute = new LoadedFileRoute("webengine/loulou.json");
+		public Route fileRoute = new FileRoute("webengine/loulou.json");
 		
 		@HTTP(url = "/trolol")
 		public View index(Request req, Response res) {

@@ -18,12 +18,12 @@ import net.omny.utils.HTTPUtils;
 import net.omny.utils.Primitive;
 import net.omny.views.View;
 
-public class DefaultHandler implements RequestHandler{
+public class DefaultHandler implements RequestHandler {
 
-  @Override
-  public boolean handle(Router router, Request request, Socket client)
-    throws IOException{
-    // Static routing
+	@Override
+	public boolean handle(Router router, Request request, Socket client)
+			throws IOException {
+		// Static routing
 		Map<Method, RouteData> findRoute = null;
 		if ((findRoute = router.getRoutes().get(request.getPath())) != null) {
 			// Here findRoute is not null
@@ -48,16 +48,16 @@ public class DefaultHandler implements RequestHandler{
 					// Writing header
 					// Writing body content
 					// End of HTTP response following the HTTP specs
-					clientWriter.write(response.toString());
+					client.getOutputStream().write(response.toStringAsByte());
 					// Flush the stream
 					clientWriter.flush();
 				}
 				// We leave here, we found a route
-        // We stop routing process
+				// We stop routing process
 				return true;
 			}
 		}
-    return false;
-  }
-  
+		return false;
+	}
+
 }
