@@ -2,10 +2,8 @@ package net.omny.views;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.Arrays;
 
 import net.omny.route.Response;
-import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 
 public class FileView implements View {

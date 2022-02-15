@@ -9,7 +9,6 @@ import net.omny.route.Response;
 import net.omny.route.Route;
 import net.omny.route.Router;
 import net.omny.route.impl.FileRoute;
-import net.omny.route.impl.LoadedFileRoute;
 import net.omny.server.WebServer;
 import net.omny.utils.Debug;
 import net.omny.views.TextView;

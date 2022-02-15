@@ -7,7 +7,6 @@ import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import net.omny.exceptions.MalformedRequestException;
-import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
 
 public final class Request {
