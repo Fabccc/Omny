@@ -18,6 +18,7 @@ public class ByteStackTest {
 
 
     @Test(expected = UnsupportedOperationException.class)
+    @SuppressWarnings("deprecation")
     public void testContains(){
         ByteStack byteStack = new ByteStack();
         byteStack.contains(null);
