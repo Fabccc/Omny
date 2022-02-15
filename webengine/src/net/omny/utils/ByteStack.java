@@ -55,7 +55,7 @@ public class ByteStack implements List<Byte> {
                 && !(array == EMPTY_ELEMENTDATA
                         && minCapacity <= DEFAULT_CAPACITY)) {
             modificationCount++;
-            grow(minCapacity);
+            this.array = grow(minCapacity);
         }
     }
 
@@ -161,7 +161,11 @@ public class ByteStack implements List<Byte> {
     public void addAllBytes(byte[] bytes) {
         int insertAt = this.size;
         int arrLength = bytes.length;
-        grow(size + arrLength);
+
+        ensureCapacity(this.size + arrLength);
+        
+        this.size += arrLength;
+
         System.arraycopy(bytes, 0, this.array, insertAt, arrLength);
     }
 
