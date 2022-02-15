@@ -1,10 +1,12 @@
 package net.omny.route;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.omny.exceptions.MalformedRequestException;
 import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
 
@@ -33,7 +35,7 @@ public final class Request {
 	 * @return
 	 * @date 08/08/2021
 	 */
-	public static Request parse(String req) {
+	public static Request parse(String req) throws MalformedRequestException{
 		String[] lines = req.split("\r\n");
 		return new Request(lines);
 	}
@@ -67,13 +69,19 @@ public final class Request {
 	 * @author Fabien CAYRE (Computer)
 	 *
 	 * @param lines
+	 * @throws MalformedRequestException If the request is malformed
 	 * @date 16/08/2021
 	 */
-	private Request(String[] lines) {
+	private Request(String[] lines) throws MalformedRequestException {
 		// Split by space
 		String[] firstLine = lines[0].split("\\s+");
 		// <METHOD> <PATH> <HTTP_VERSION>
-		this.method = Ex.grab(() -> Method.valueOf(firstLine[0]), Method.GET);
+		try{
+			this.method = Method.valueOf(firstLine[0]);
+		}catch(IllegalArgumentException	 e){
+			// Method.valueOf not found 
+			throw new MalformedRequestException(Arrays.toString(lines));
+		}
 		this.path = firstLine[1];
 		this.httpVersion = HTTPUtils.Version.byTag(firstLine[2]);
 

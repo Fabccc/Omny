@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.moandjiezana.toml.Toml;
 
 import lombok.Getter;
+import net.omny.exceptions.MalformedRequestException;
 import net.omny.route.Request;
 import net.omny.route.Router;
 import net.omny.utils.ConfigFile;
@@ -23,6 +24,7 @@ public abstract class WebServer {
 
 	/**
 	 * Create a webserver builder
+	 * 
 	 * @author Fabien CAYRE (Computer)
 	 *
 	 * @return WebServerBuilder the builder to create the web server
@@ -31,79 +33,83 @@ public abstract class WebServer {
 	public static WebServerBuilder builder() {
 		return new WebServerBuilder();
 	}
-	
+
 	/**
-	 * Launch the provided instance 
+	 * Launch the provided instance
+	 * 
 	 * @author Fabien CAYRE (Computer)
 	 *
 	 * @param webServer The WebServer instance
 	 * @date 08/08/2021
 	 */
 	public static void launch(WebServer webServer) {
-		if(webServer.threadPool == null) {
+		if (webServer.threadPool == null) {
 			// Thread pool was not provided
 			// 4 default
-			//TODO replace this value with either value from configFile or value depending on system capabilities
+			// TODO replace this value with either value from configFile or value depending
+			// on system capabilities
 			webServer.threadPool = Executors.newScheduledThreadPool(4);
 		}
 
 		webServer.init();
-		
+
 		webServer.threadPool.submit(() -> {
 			// Run the server
 			try (ServerSocket serverSocket = new ServerSocket(webServer.port)) {
-				Debug.debug("Thread pool has "+webServer.threadPoolSize+" threads.");
-				Debug.debug("Listening on port "+webServer.port);
+				Debug.debug("Thread pool has " + webServer.threadPoolSize + " threads.");
+				Debug.debug("Listening on port " + webServer.port);
 				webServer.running.set(true);
 				while (webServer.running.get()) {
 					Socket client = serverSocket.accept();
 					webServer.threadPool.submit(
-						() -> {
-							Debug.debug(Thread.currentThread().getName()+" is handling "+client.getInetAddress());
-							Ex.grab(() -> webServer.handler(client));
-						});
+							() -> {
+								Debug.debug(
+										Thread.currentThread().getName() + " is handling " + client.getInetAddress());
+								Ex.grab(() -> webServer.handler(client));
+							});
 				}
-			}catch(Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		});
-		
+
 	}
-	
+
 	private Router router;
 	private ExecutorService threadPool;
 	@Getter
 	protected int port = (int) ConfigFile.DEFAULT_PORT;
-	@Getter 
+	@Getter
 	private final AtomicBoolean running = new AtomicBoolean(false);
 	@Getter
 	private int threadPoolSize;
-	
+
 	public WebServer(String configFile) {
 		this();
 		this.router = new Router();
-		//TODO Load config file
+		// TODO Load config file
 		Toml toml = new Toml().read(new File(configFile));
 		this.port = toml.getLong(ConfigFile.PORT, ConfigFile.DEFAULT_PORT).intValue();
 
 		int threadCount = toml.getLong(ConfigFile.THREAD_COUNT, -1L).intValue();
-		if(threadCount == -1){
+		if (threadCount == -1) {
 			// Determine number of thread depending on system capabilities
 			threadCount = Runtime.getRuntime().availableProcessors() / 2;
 		}
 		this.threadPool = Executors.newScheduledThreadPool(threadCount);
 		this.threadPoolSize = threadCount;
 	}
-	
+
 	public WebServer(String configFile, ExecutorService threadPool) {
 		this(configFile);
 		this.threadPool = threadPool;
 	}
-	
-	public WebServer() {}
-	
+
+	public WebServer() {
+	}
+
 	private void init() {
-		//TODO init the web server
+		// TODO init the web server
 		// -> handling routes
 		// -> FUTURE : handling middleware
 		route(this.router);
@@ -115,12 +121,11 @@ public abstract class WebServer {
 	 * 
 	 * @param runnable The function to run in background
 	 */
-	public void background(Runnable runnable){
+	public void background(Runnable runnable) {
 		this.threadPool
-			.submit(runnable);
+				.submit(runnable);
 	}
 
-	
 	/**
 	 * Initializing routes for the webserver
 	 * 
@@ -130,14 +135,15 @@ public abstract class WebServer {
 	 * @date 08/08/2021
 	 */
 	public abstract void route(Router router);
-	
+
 	/**
 	 * The handler of clientSocket
 	 * The handler must close the socket itself due to Multithreading
+	 * 
 	 * @author Fabien CAYRE (Computer)
 	 *
 	 * @param clientSocket
-	 * @throws IOException 
+	 * @throws IOException
 	 * @date 08/08/2021
 	 */
 	public void handler(Socket clientSocket) throws IOException {
@@ -151,13 +157,20 @@ public abstract class WebServer {
 			// Line breaking is describe as CR LF => \r \n
 			requestBuilder.append(line + "\r\n");
 		}
-		Request request = Request.parse(requestBuilder.toString());
-		
-		this.router.handleRoute(request, clientSocket);
-		
-		
-		clientSocket.close();
-		Debug.time("handle_request", request.getMethod()+" on '"+request.getPath()+"' processed in {ms} ms.");
+		Request request;
+		try {
+			request = Request.parse(requestBuilder.toString());
+			this.router.handleRoute(request, clientSocket);
+
+			clientSocket.close();
+			Debug.time("handle_request", request.getMethod() + " on '" + request.getPath() + "' processed in {ms} ms.");
+		} catch (MalformedRequestException e) {
+			if(!clientSocket.isClosed()){
+				this.router.sendMalformed(clientSocket);
+				clientSocket.close();
+			}
+		}
+
 	}
-	
+
 }

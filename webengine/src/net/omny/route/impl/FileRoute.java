@@ -10,6 +10,7 @@ import lombok.Getter;
 import net.omny.route.Request;
 import net.omny.route.Response;
 import net.omny.route.Route;
+import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
 import net.omny.views.FileView;
@@ -27,9 +28,9 @@ public class FileRoute implements Route{
 	 * The path to the file (relative)
 	 */
 	@Getter
-	private String filePath;
+	protected String filePath;
 	
-	private FileView fileView;
+	protected FileView fileView;
 
 	/**
 	 * Constructor of the file
@@ -41,6 +42,7 @@ public class FileRoute implements Route{
 	public FileRoute(String filePath) {
 		this.filePath = filePath;
 		this.fileView = new FileView(this.filePath);
+		Debug.debug("Created file route with path '"+filePath+"'");
 	}
 	
 	/**

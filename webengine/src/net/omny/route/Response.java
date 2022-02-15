@@ -50,8 +50,12 @@ public class Response {
 		this.httpVersion = req.getHttpVersion();
 	}
 
-	public Response() {
+	public Response (Code code, HTTPUtils.Version version){
+		this.httpVersion = version;
+		this.responseCode = code;
+	}
 
+	public Response (){
 	}
 
 	public String getHeader(String header) {

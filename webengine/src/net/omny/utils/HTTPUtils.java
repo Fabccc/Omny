@@ -42,6 +42,7 @@ public class HTTPUtils {
 	
 	static {
 		MIMES_TYPES.put(".js", "application/javascript");
+		MIMES_TYPES.put(".exe", "application/vnd.microsoft.portable-executable");
 	}
 	
 	/**

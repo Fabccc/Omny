@@ -9,7 +9,9 @@ import net.omny.route.Response;
 import net.omny.route.Route;
 import net.omny.route.Router;
 import net.omny.route.impl.FileRoute;
+import net.omny.route.impl.LoadedFileRoute;
 import net.omny.server.WebServer;
+import net.omny.utils.Debug;
 import net.omny.views.TextView;
 import net.omny.views.View;
 
@@ -26,26 +28,27 @@ public class Test extends WebServer{
 	private static final ExecutorService SERVICE = Executors.newScheduledThreadPool(6);
 	
 	public static void main(String[] args) {
+		Debug.ENABLE = true;
 		launch(new Test());
 	}
 	
 	public Test() {
-		super("./conf.toml", SERVICE);
+		super("conf.toml", SERVICE);
 	}
 	
 	@Override
 	public void route(Router router) {
 		router.route(TestRouter.class);
-		router.staticRoute("./static");
+		router.staticRoute("./webengine/static");
 	}
 	
 	public static class TestRouter {
 		
 		@HTTP(url = "/")
-		public Route indexRoute = new FileRoute("index.html");
+		public Route indexRoute = new LoadedFileRoute("webengine/index.html");
 
 		@HTTP(url = "/loulou")
-		public Route fileRoute = new FileRoute("loulou.json");
+		public Route fileRoute = new LoadedFileRoute("webengine/loulou.json");
 		
 		@HTTP(url = "/trolol")
 		public View index(Request req, Response res) {

@@ -21,7 +21,9 @@ import net.omny.route.impl.FileRoute;
 import net.omny.route.impl.LoadedFileRoute;
 import net.omny.utils.Debug;
 import net.omny.utils.Ex;
+import net.omny.utils.HTTPUtils;
 import net.omny.utils.Primitive;
+import net.omny.utils.HTTPUtils.Version;
 import net.omny.views.View;
 
 /**
@@ -40,8 +42,7 @@ public class Router {
 	@Getter
 	private Map<String, Map<Method, RouteData>> routes = new HashMap<>();
 	@Getter
-	private EnumMap<PriorityHandler, List<RequestHandler>> handlers = 
-		new EnumMap<>(PriorityHandler.class);
+	private EnumMap<PriorityHandler, List<RequestHandler>> handlers = new EnumMap<>(PriorityHandler.class);
 
 	public Router() {
 		// By default
@@ -94,7 +95,8 @@ public class Router {
 					if (View.class.isAssignableFrom(returnType)) {
 						// The return type is implementing View interface
 						if (method.getParameterCount() == 2) {
-							if (method.getParameterTypes()[0] == Request.class && method.getParameterTypes()[1] == Response.class) {
+							if (method.getParameterTypes()[0] == Request.class
+									&& method.getParameterTypes()[1] == Response.class) {
 								// Both res and req are present as parameter
 								HTTP annotation = method.getAnnotation(HTTP.class);
 								// We get annotation content
@@ -154,8 +156,14 @@ public class Router {
 			if (rootFolder.isFile()) {
 				throw new IllegalArgumentException("Require a folder, file was provide");
 			}
-			for (File subFile : rootFolder.listFiles())
-				routeFile("", subFile);
+			try {
+				for (File subFile : rootFolder.listFiles())
+					routeFile("", subFile);
+			} catch (Exception e) {
+				if (Debug.ENABLE) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return this;
 	}
@@ -192,7 +200,6 @@ public class Router {
 		return route(path, new FileRoute(filePath), Method.GET);
 	}
 
-
 	// =========================================
 	// Handlers functions
 
@@ -202,22 +209,22 @@ public class Router {
 	 * @param handler The request handler
 	 * @return The router object
 	 */
-	public Router handler(RequestHandler handler){
+	public Router handler(RequestHandler handler) {
 		return handler(handler, PriorityHandler.DEFAULT);
 	}
 
-
 	/**
 	 * Add an handler to the current list of request handlers with priority defined
-	 * @param handler The request handler
+	 * 
+	 * @param handler  The request handler
 	 * @param priority The priority of this handler
 	 * @return The router object
 	 */
-	public Router handler(RequestHandler handler, PriorityHandler priority){
-		if(this.handlers.containsKey(priority)){
+	public Router handler(RequestHandler handler, PriorityHandler priority) {
+		if (this.handlers.containsKey(priority)) {
 			// This priority already exists and there is a list linked to
 			this.handlers.get(priority).add(handler);
-		}else{
+		} else {
 			// This priority doesn't exists
 			// We must create a new List containing the handler
 			// Then put it to this priority
@@ -241,15 +248,14 @@ public class Router {
 	public boolean handleRoute(Request request, Socket client) throws IOException {
 
 		// Processing request handlers...
-		for(PriorityHandler priority : this.handlers.keySet()){
-			for(RequestHandler handler : this.handlers.get(priority)){
-				if(handler.handle(this, request, client))
+		for (PriorityHandler priority : this.handlers.keySet()) {
+			for (RequestHandler handler : this.handlers.get(priority)) {
+				if (handler.handle(this, request, client))
 					// If handler returns true
 					// Then we must stop processing more
 					return true;
 			}
 		}
-
 
 		// Dynamic routing
 		RouteLoop: for (String path : this.routes.keySet()) {
@@ -284,7 +290,7 @@ public class Router {
 				}
 			}
 			RouteData routeData = null;
-			if((routeData = this.routes.get(path).get(request.getMethod())) == null){
+			if ((routeData = this.routes.get(path).get(request.getMethod())) == null) {
 				// Path exist but not with this method
 				continue RouteLoop;
 			}
@@ -320,7 +326,7 @@ public class Router {
 			return true;
 		}
 		// Returning a 404 Not Found
-		//IT'S VERY IMPORTANT, IT MUST STAY AT THE END OF EVERY ROUTES
+		// IT'S VERY IMPORTANT, IT MUST STAY AT THE END OF EVERY ROUTES
 		Response response = new Response(request);
 		response.setResponseCode(Code.E404_NOT_FOUND);
 
@@ -335,6 +341,26 @@ public class Router {
 		// Flush the stream
 		clientWriter.flush();
 		return false;
+	}
+
+	public void sendMalformed(Socket client) {
+		try {
+			Debug.debug("Handling malformed request");
+			var clientStream = client.getOutputStream();
+			
+			Response response = new Response(Code.E400_BAD_REQUEST, Version.V1_1);
+			response.setResponseCode(Code.E404_NOT_FOUND);
+
+			if(client.isClosed()){
+				return;
+			}
+			clientStream.write(response.toStringAsByte());
+			clientStream.write(HTTPUtils.DOUBLE_CRLF_AS_BYTES);
+			clientStream.flush();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

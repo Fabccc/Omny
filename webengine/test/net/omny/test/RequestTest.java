@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import net.omny.exceptions.MalformedRequestException;
 import net.omny.route.Method;
 import net.omny.route.Request;
 public class RequestTest{
@@ -15,7 +16,7 @@ public class RequestTest{
 
   
   @Test
-  public void testRequestParsing(){
+  public void testRequestParsing() throws MalformedRequestException{
     Request request = Request.parse(REQUEST);
     
     assertEquals(Method.GET, request.getMethod());
@@ -24,7 +25,7 @@ public class RequestTest{
   }
   
   @Test
-  public void testRequestIgnoreCase() {
+  public void testRequestIgnoreCase() throws MalformedRequestException {
   	Request request = Request.parse(REQUEST);
 
     assertEquals("localhost:8080", request.getHeader("Host"));
