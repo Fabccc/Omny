@@ -23,12 +23,8 @@ public class FileView implements View {
 	@Override
 	public void write(Response res) {
 		Ex.grab(() -> {
-			Debug.debug("A");
 			byte[] fileBytes = Files.readAllBytes(file.toPath());
-			Debug.debug("B");
 			res.addBody(fileBytes);
-			Debug.debug("C");
-			Debug.debug(new String(res.toStringAsByte()));
 			
 		});
 	}

@@ -7,7 +7,6 @@ import java.nio.file.Path;
 
 import net.omny.route.Request;
 import net.omny.route.Response;
-import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
 import net.omny.views.View;
@@ -50,15 +49,6 @@ public class LoadedFileRoute extends FileRoute {
     }
     if (mimeType == null) {
       mimeType = HTTPUtils.findMime(this.filePath);
-    }
-
-    Debug.debug("file type " + mimeType);
-    if (mimeType.equals("application/pdf")
-        || mimeType.equals("application/vnd.microsoft.portable-executable")
-        || mimeType.equals("application/x-msdownload")) {
-      Debug.debug("Created LoadedFileRoute with binary content (PDF, EXE, BIN etc...)");
-    } else {
-      Debug.debug("Created LoadedFileRoute with content '" + new String(this.bytes) + "'");
     }
 
   }
