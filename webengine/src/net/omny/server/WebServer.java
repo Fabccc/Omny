@@ -8,11 +8,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.moandjiezana.toml.Toml;
 
 import lombok.Getter;
+import net.omny.cache.CachingRequest;
 import net.omny.exceptions.MalformedRequestException;
 import net.omny.route.Request;
 import net.omny.route.Router;
@@ -75,22 +77,27 @@ public abstract class WebServer {
 
 	}
 
-	private Router router;
-	private ExecutorService threadPool;
+	// Default fields
+	@Getter
+	private Router router = new Router();
 	@Getter
 	protected int port = (int) ConfigFile.DEFAULT_PORT;
 	@Getter
 	private final AtomicBoolean running = new AtomicBoolean(false);
+
+
 	@Getter
 	private int threadPoolSize;
+	@Getter
+	private ScheduledExecutorService threadPool;
+	@Getter
+	private CachingRequest caching ;
 
 	public WebServer(String configFile) {
 		this();
-		this.router = new Router();
 		// TODO Load config file
-		Toml toml = new Toml().read(new File(configFile));
-		this.port = toml.getLong(ConfigFile.PORT, ConfigFile.DEFAULT_PORT).intValue();
-
+		Toml toml = initConstructor(configFile);
+		
 		int threadCount = toml.getLong(ConfigFile.THREAD_COUNT, -1L).intValue();
 		if (threadCount == -1) {
 			// Determine number of thread depending on system capabilities
@@ -98,14 +105,31 @@ public abstract class WebServer {
 		}
 		this.threadPool = Executors.newScheduledThreadPool(threadCount);
 		this.threadPoolSize = threadCount;
+
+		postInit();
 	}
 
-	public WebServer(String configFile, ExecutorService threadPool) {
-		this(configFile);
+	public WebServer(String configFile, ScheduledExecutorService threadPool, int threadPoolSize) {
+		
+		initConstructor(configFile);
+
 		this.threadPool = threadPool;
+		this.threadPoolSize = threadPoolSize;
+
+		postInit();
 	}
 
 	public WebServer() {
+	}
+
+	private Toml initConstructor(String configFile){
+		Toml toml = new Toml().read(new File(configFile));
+		this.port = toml.getLong(ConfigFile.PORT, ConfigFile.DEFAULT_PORT).intValue();
+		return toml;
+	}
+
+	private void postInit(){
+		this.caching = new CachingRequest(this);
 	}
 
 	private void init() {
@@ -160,7 +184,21 @@ public abstract class WebServer {
 		Request request;
 		try {
 			request = Request.parse(requestBuilder.toString());
-			this.router.handleRoute(request, clientSocket);
+
+			// handle caching here
+			int count = this.caching.countRequest(request.getPath());
+			if(count > 0){
+				byte[] rawResponse = this.caching.get(request.getPath());
+				Debug.debug("Accessed cached request '"+request.getPath()+"' (access : "+count+")");
+				clientSocket.getOutputStream().write(rawResponse);
+				try {
+					this.caching.cacheRequest(request.getPath());
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}else{
+				this.router.handleRoute(this, request, clientSocket);
+			}
 
 			clientSocket.close();
 			Debug.time("handle_request", request.getMethod() + " on '" + request.getPath() + "' processed in {ms} ms.");

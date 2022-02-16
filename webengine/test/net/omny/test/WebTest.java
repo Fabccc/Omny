@@ -2,6 +2,7 @@ package net.omny.test;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import net.omny.route.Router;
 import net.omny.server.WebServer;
@@ -53,7 +54,7 @@ import net.omny.server.WebServer;
  */
 public class WebTest extends WebServer{
 
-	private static final ExecutorService SERVICE = Executors.newScheduledThreadPool(4);
+	private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(4);
 	
 	public static void main(String[] args) {
 		launch(new WebTest());

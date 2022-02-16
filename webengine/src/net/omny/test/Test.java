@@ -2,6 +2,7 @@ package net.omny.test;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import net.omny.route.HTTP;
 import net.omny.route.Request;
@@ -24,10 +25,10 @@ public class Test extends WebServer{
 
 	*/
 	private static final int THREAD_COUNT = 12;
-	private static final ExecutorService SERVICE = Executors.newScheduledThreadPool(THREAD_COUNT);
+	private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(THREAD_COUNT);
 	
 	public static void main(String[] args) {
-		Debug.ENABLE = true;
+		Debug.ENABLE = false;
 		launch(new Test());
 	}
 	

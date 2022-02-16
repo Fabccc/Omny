@@ -19,11 +19,12 @@ import net.omny.route.handlers.PriorityHandler;
 import net.omny.route.handlers.RequestHandler;
 import net.omny.route.impl.FileRoute;
 import net.omny.route.impl.LoadedFileRoute;
+import net.omny.server.WebServer;
 import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
-import net.omny.utils.Primitive;
 import net.omny.utils.HTTPUtils.Version;
+import net.omny.utils.Primitive;
 import net.omny.views.View;
 
 /**
@@ -245,12 +246,12 @@ public class Router {
 	 * @return true if at least one route is the path, false otherwise
 	 * @date 15/08/2021
 	 */
-	public boolean handleRoute(Request request, Socket client) throws IOException {
+	public boolean handleRoute(WebServer webServer, Request request, Socket client) throws IOException {
 
 		// Processing request handlers...
 		for (PriorityHandler priority : this.handlers.keySet()) {
 			for (RequestHandler handler : this.handlers.get(priority)) {
-				if (handler.handle(this, request, client))
+				if (handler.handle(webServer, this, request, client))
 					// If handler returns true
 					// Then we must stop processing more
 					return true;

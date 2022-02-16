@@ -5,6 +5,7 @@ import java.net.Socket;
 
 import net.omny.route.Request;
 import net.omny.route.Router;
+import net.omny.server.WebServer;
 
 /**
  * Interface 
@@ -20,7 +21,7 @@ public interface RequestHandler {
    * @return TRUE if request processing should stop, FALSE otherwise (Middleware)
    * @throws IOException
    */
-  boolean handle(Router router, Request request, Socket client)
+  boolean handle(WebServer webServer, Router router, Request request, Socket client)
     throws IOException;
 
 }
