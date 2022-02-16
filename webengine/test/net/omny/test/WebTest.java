@@ -60,7 +60,7 @@ public class WebTest extends WebServer{
 	}
 	
 	public WebTest() {
-		super("conf.toml", SERVICE);
+		super("conf.toml", SERVICE, 4);
 	}
 
 	@Override

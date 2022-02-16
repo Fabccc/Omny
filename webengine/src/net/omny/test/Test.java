@@ -23,8 +23,8 @@ public class Test extends WebServer{
 	Number of threads = Number of Available Cores * (1 + Wait time / Service time)
 
 	*/
-
-	private static final ExecutorService SERVICE = Executors.newScheduledThreadPool(6);
+	private static final int THREAD_COUNT = 12;
+	private static final ExecutorService SERVICE = Executors.newScheduledThreadPool(THREAD_COUNT);
 	
 	public static void main(String[] args) {
 		Debug.ENABLE = true;
@@ -32,7 +32,7 @@ public class Test extends WebServer{
 	}
 	
 	public Test() {
-		super("conf.toml", SERVICE);
+		super("conf.toml", SERVICE, THREAD_COUNT);
 	}
 	
 	@Override
