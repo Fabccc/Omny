@@ -3,9 +3,9 @@ package net.omny.cache;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import net.omny.server.WebServer;
@@ -63,7 +63,7 @@ public class CachingRequest {
             rq.updateAt = System.currentTimeMillis();
             rq.count.incrementAndGet();
         } else {
-            cache.put(path, new CachedRequest(content, path, time, System.currentTimeMillis(), new AtomicInteger(1)));
+            cache.put(path, new CachedRequest(content, time, System.currentTimeMillis(), new AtomicInteger(1)));
         }
     }
 
@@ -99,7 +99,6 @@ public class CachingRequest {
     private class CachedRequest {
 
         public byte[] content;
-        public String url;
         public long time;
         public long updateAt;
         public AtomicInteger count;
