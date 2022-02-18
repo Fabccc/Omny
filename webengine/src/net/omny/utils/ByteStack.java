@@ -149,6 +149,10 @@ public class ByteStack implements List<Byte> {
         this.addAllBytes(array);
     }
 
+    public void pushArrayHack(byte e){
+        this.addAllBytes(new byte[]{e});
+    }
+
     /**
      * @deprecated Non-sense in a byte stack data structure
      */

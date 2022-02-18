@@ -107,7 +107,7 @@ public class ArrayVsByteStack {
     @Warmup(iterations = 1, time = 2)
     @Measurement(iterations = 5, time = 2)
     @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void pushAndPop() {
         pushAndPop(createBytes());
     }
@@ -117,7 +117,7 @@ public class ArrayVsByteStack {
     @Warmup(iterations = 1, time = 2)
     @Measurement(iterations = 5, time = 2)
     @BenchmarkMode(Mode.AverageTime)
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     public void addAll() {
         addAll(createBytes());
     }
