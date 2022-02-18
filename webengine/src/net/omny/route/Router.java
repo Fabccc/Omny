@@ -254,7 +254,7 @@ public class Router {
 				if (handler.handle(webServer, this, request, client))
 					// If handler returns true
 					// Then we must stop processing more
-					return true;
+				return true;
 			}
 		}
 
@@ -348,11 +348,11 @@ public class Router {
 		try {
 			Debug.debug("Handling malformed request");
 			var clientStream = client.getOutputStream();
-			
+
 			Response response = new Response(Code.E400_BAD_REQUEST, Version.V1_1);
 			response.setResponseCode(Code.E404_NOT_FOUND);
 
-			if(client.isClosed()){
+			if (client.isClosed()) {
 				return;
 			}
 			clientStream.write(response.toStringAsByte());

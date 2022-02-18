@@ -5,12 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 
 import lombok.Getter;
 import lombok.Setter;
 import net.omny.utils.ByteStack;
+import net.omny.utils.Debug;
 import net.omny.utils.HTTPUtils;
+import net.omny.utils.StringUtils;
 import net.omny.utils.HTTPUtils.Version;
 
 public class Response {

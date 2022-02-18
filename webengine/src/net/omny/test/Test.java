@@ -28,7 +28,7 @@ public class Test extends WebServer{
 	private static final ScheduledExecutorService SERVICE = Executors.newScheduledThreadPool(THREAD_COUNT);
 	
 	public static void main(String[] args) {
-		Debug.ENABLE = false;
+		Debug.ENABLE = true;
 		launch(new Test());
 	}
 	

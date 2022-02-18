@@ -173,7 +173,6 @@ public abstract class WebServer {
 	public void handler(Socket clientSocket) throws IOException {
 		Debug.reset("handle_request");
 		BufferedReader br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
 		StringBuilder requestBuilder = new StringBuilder();
 		String line;
 		while ((line = br.readLine()) != null && !line.isBlank()) {
