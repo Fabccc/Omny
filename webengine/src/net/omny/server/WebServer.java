@@ -171,6 +171,15 @@ public abstract class WebServer {
 	 */
 	public void handler(Socket clientSocket) throws IOException {
 		Debug.reset("handle_request");
+
+		// TODO : Maybe better way to do this when caching
+		// Example:
+		// Only read one line
+		// Get the path
+		// Check in the cache 
+		// If no cache found, then just read the entire request
+
+
 		BufferedReader br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		StringBuilder requestBuilder = new StringBuilder();
 		String line;
