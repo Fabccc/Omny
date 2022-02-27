@@ -84,19 +84,18 @@ public abstract class WebServer {
 	@Getter
 	private final AtomicBoolean running = new AtomicBoolean(false);
 
-
 	@Getter
 	private int threadPoolSize;
 	@Getter
 	private ScheduledExecutorService threadPool;
 	@Getter
-	private CachingRequest caching ;
+	private CachingRequest caching;
 
 	public WebServer(String configFile) {
 		this();
 		// TODO Load config file
 		Toml toml = initConstructor(configFile);
-		
+
 		int threadCount = toml.getLong(ConfigFile.THREAD_COUNT, -1L).intValue();
 		if (threadCount == -1) {
 			// Determine number of thread depending on system capabilities
@@ -109,7 +108,7 @@ public abstract class WebServer {
 	}
 
 	public WebServer(String configFile, ScheduledExecutorService threadPool, int threadPoolSize) {
-		
+
 		initConstructor(configFile);
 
 		this.threadPool = threadPool;
@@ -121,13 +120,13 @@ public abstract class WebServer {
 	public WebServer() {
 	}
 
-	private Toml initConstructor(String configFile){
+	private Toml initConstructor(String configFile) {
 		Toml toml = new Toml().read(new File(configFile));
 		this.port = toml.getLong(ConfigFile.PORT, ConfigFile.DEFAULT_PORT).intValue();
 		return toml;
 	}
 
-	private void postInit(){
+	private void postInit() {
 		this.caching = new CachingRequest(this);
 	}
 
@@ -176,27 +175,18 @@ public abstract class WebServer {
 		// Example:
 		// Only read one line
 		// Get the path
-		// Check in the cache 
+		// Check in the cache
 		// If no cache found, then just read the entire request
 
-
 		BufferedReader br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-		StringBuilder requestBuilder = new StringBuilder();
-		String line;
-		while ((line = br.readLine()) != null && !line.isBlank()) {
-			// Following the RFC at this link: https://datatracker.ietf.org/doc/html/rfc2616
-			// Line breaking is describe as CR LF => \r \n
-			requestBuilder.append(line + "\r\n");
-		}
-		Request request;
+		String headerLine = br.readLine();
 		try {
-			request = Request.parse(requestBuilder.toString());
+			Request request = Request.lightWeight(headerLine);
 
-			// handle caching here
 			int count = this.caching.countRequest(request.getPath());
-			if(count > 0){
+			if (count > 0) {
 				byte[] rawResponse = this.caching.get(request.getPath());
-				Debug.debug("Accessed cached request '"+request.getPath()+"' (access : "+count+")");
+				Debug.debug("Accessed cached request '" + request.getPath() + "' (access : " + count + ")");
 				clientSocket.getOutputStream().write(rawResponse);
 				try {
 					this.caching.cacheRequest(request.getPath());
@@ -204,13 +194,20 @@ public abstract class WebServer {
 					e.printStackTrace();
 				}
 			}else{
+				StringBuilder requestBuilder = new StringBuilder();
+				String line;
+				while ((line = br.readLine()) != null && !line.isBlank()) {
+					// Following the RFC at this link: https://datatracker.ietf.org/doc/html/rfc2616
+					// Line breaking is describe as CR LF => \r \n
+					requestBuilder.append(line + "\r\n");
+				}
+				request.readFurther(requestBuilder.toString());
 				this.router.handleRoute(this, request, clientSocket);
 			}
-
 			clientSocket.close();
 			Debug.time("handle_request", request.getMethod() + " on '" + request.getPath() + "' processed in {ms} ms.");
 		} catch (MalformedRequestException e) {
-			if(!clientSocket.isClosed()){
+			if (!clientSocket.isClosed()) {
 				this.router.sendMalformed(clientSocket);
 				clientSocket.close();
 			}
