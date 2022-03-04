@@ -35,7 +35,7 @@ public class CachingRequestTest {
     public void testCache1000() {
         // Store it, set time of cache at 0ms
         cachingRequest.cacheRequest("/", RESPONSE, 10000);
-        cachingRequest.updateCache(); // it must remove the response from the cache
+        cachingRequest.updateCache(); // it must not remove the response from the cache
         assertEquals(1, cachingRequest.countRequest("/"));
     }
 
