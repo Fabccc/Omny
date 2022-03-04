@@ -2,6 +2,31 @@
 
 Java lightweight web serverside framework
 
+### TODO
+
+- [x] HTTP Request handling
+- [x] HTTP Response
+- [x] Files type
+  - [x] Text files
+  - [x] Binary files
+  - [x] JSON from Object
+- [ ] Method
+  - [x] GET
+  - [ ] POST
+  - [ ] PUT
+  - [ ] DELETE
+- [ ] File routing
+  - [x] Static files routing
+  - [x] Default file routing (from a Router class)
+  - [ ] Param file routing
+- [ ] Encoding
+  - [ ] GZIP
+  - [ ] Deflate
+- [ ] Optimizing
+  - [x] Cache request
+  - [x] Fast cache lookup
+  - [ ] More ??..
+
 
 ## Microbenching test can be found under `jmh-test/` folder
 [Microbenching README.MD](jmh-test/README.md)
