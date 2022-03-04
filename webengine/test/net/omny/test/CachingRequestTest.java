@@ -18,9 +18,15 @@ public class CachingRequestTest {
     }
 
     @Test
-    public void testCache0() {
+    public void testCache0() throws InterruptedException {
         // Store it, set time of cache at 0ms
-        cachingRequest.cacheRequest("/", RESPONSE, 0);
+        cachingRequest.cacheRequest("/", RESPONSE, 10);
+        
+        // Simulate inactive state of the server
+        // The server hasn't receive a request for 50 ms
+        // And the cache for the request with path "/" is set to 10ms
+        Thread.sleep(50); 
+
         cachingRequest.updateCache(); // it must remove the response from the cache
         assertEquals(0, cachingRequest.countRequest("/"));
     }
