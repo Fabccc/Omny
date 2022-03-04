@@ -254,8 +254,18 @@ public class Router {
 				if (handler.handle(webServer, this, request, client))
 					// If handler returns true
 					// Then we must stop processing more
+					return true;
+			}
+		}
+		// Static routing
+		if (this.routes.containsKey(request.getPath())) {
+			if (this.routes.get(request.getPath()).containsKey(request.getMethod())) {
+				RouteData routeData = this.routes.get(request.getPath()).get(request.getMethod());
+				Debug.debug("Found static route for " + request.getPath());
+				sendCorrect(client, routeData, request);
 				return true;
 			}
+
 		}
 
 		// Dynamic routing
@@ -276,6 +286,12 @@ public class Router {
 			if (division.length != currentUrlDivision.length) {
 				continue;
 			}
+
+			RouteData routeData = null;
+			if ((routeData = this.routes.get(path).get(request.getMethod())) == null) {
+				// Path exist but not with this method
+				continue RouteLoop;
+			}
 			// We compare each division
 			Map<String, String> params = new HashMap<>();
 			for (int i = 0; i < currentUrlDivision.length; i++) {
@@ -290,40 +306,12 @@ public class Router {
 					params.put(paramName, paramValue);
 				}
 			}
-			RouteData routeData = null;
-			if ((routeData = this.routes.get(path).get(request.getMethod())) == null) {
-				// Path exist but not with this method
-				continue RouteLoop;
-			}
 			Debug.debug("Found route for " + request.getPath());
 
 			// current division path are the same
 			// It's the same route
 			request.setParams(params);
-			Response response = new Response(request);
-
-			View view = routeData.getRoute().handle(request, response);
-			view.write(response);
-			// The content length of the response body, in bytes
-
-			if (response.isBinary()) {
-				Debug.debug("File is binary");
-				client.getOutputStream().write(response.toString().getBytes(StandardCharsets.UTF_8));
-
-				client.getOutputStream().write(Primitive.toArray(response.getBody()));
-
-				client.getOutputStream().write("\r\n\r\n".getBytes());
-
-				client.getOutputStream().flush();
-			} else {
-				BufferedWriter clientWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
-				// Writing header
-				// Writing body content
-				// End of HTTP response following the HTTP specs
-				clientWriter.write(response.toString());
-				// Flush the stream
-				clientWriter.flush();
-			}
+			sendCorrect(client, routeData, request);
 			return true;
 		}
 		// Returning a 404 Not Found
@@ -342,6 +330,33 @@ public class Router {
 		// Flush the stream
 		clientWriter.flush();
 		return false;
+	}
+
+	public void sendCorrect(Socket client, RouteData routeData, Request request) throws IOException {
+		Response response = new Response(request);
+
+		View view = routeData.getRoute().handle(request, response);
+		view.write(response);
+		// The content length of the response body, in bytes
+
+		if (response.isBinary()) {
+			Debug.debug("File is binary");
+			client.getOutputStream().write(response.toString().getBytes(StandardCharsets.UTF_8));
+
+			client.getOutputStream().write(Primitive.toArray(response.getBody()));
+
+			client.getOutputStream().write(HTTPUtils.DOUBLE_CRLF_AS_BYTES);
+
+			client.getOutputStream().flush();
+		} else {
+			BufferedWriter clientWriter = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+			// Writing header
+			// Writing body content
+			// End of HTTP response following the HTTP specs
+			clientWriter.write(response.toString());
+			// Flush the stream
+			clientWriter.flush();
+		}
 	}
 
 	public void sendMalformed(Socket client) {
