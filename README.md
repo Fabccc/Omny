@@ -26,6 +26,9 @@ Java lightweight web serverside framework
   - [x] Cache request
   - [x] Fast cache lookup
   - [ ] More ??..
+- [ ] Features from the framework
+  - [ ] Namespaces
+  - [ ] More ...
 
 
 ## Microbenching test can be found under `jmh-test/` folder
