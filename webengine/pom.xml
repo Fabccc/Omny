@@ -74,21 +74,38 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>build-test-server</id>
 						<phase>package</phase>
 						<goals>
-							<goal>single</goal>
+							<goal>assembly</goal>
 						</goals>
 						<configuration>
 							<archive>
-							<manifest>
-								<mainClass>
+								<manifest>
+									<mainClass>
 									net.omny.test.Test
 								</mainClass>
-							</manifest>
+								</manifest>
 							</archive>
 							<descriptorRefs>
 								<descriptorRef>jar-with-dependencies</descriptorRef>
 							</descriptorRefs>
+							<finalName>omny-test-server</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
+						</configuration>
+					</execution>
+					<execution>
+						<id>build-lib</id>
+						<phase>package</phase>
+						<goals>
+							<goal>assembly</goal>
+						</goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<finalName>omny-lib</finalName>
+							<appendAssemblyId>false</appendAssemblyId>
 						</configuration>
 					</execution>
 				</executions>
