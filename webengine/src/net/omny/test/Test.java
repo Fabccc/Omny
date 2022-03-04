@@ -8,7 +8,9 @@ import net.omny.route.Request;
 import net.omny.route.Response;
 import net.omny.route.Route;
 import net.omny.route.Router;
+import net.omny.route.RouterOptions;
 import net.omny.route.impl.FileRoute;
+import net.omny.route.impl.TextRoute;
 import net.omny.server.WebServer;
 import net.omny.utils.Debug;
 import net.omny.views.TextView;
@@ -38,6 +40,7 @@ public class Test extends WebServer{
 	@Override
 	public void route(Router router) {
 		router.route(TestRouter.class);
+		router.route(NamespaceTestRouter.class);
 		router.staticRoute("./webengine/static");
 	}
 	
@@ -55,6 +58,14 @@ public class Test extends WebServer{
 			return new TextView("trolololllololololololololololo");
 		}
 		
+	}
+
+	@RouterOptions(namespace = "api")
+	public static class NamespaceTestRouter{
+
+		@HTTP(url = "user")
+		public Route userApi = new TextRoute("Oula bizarrrreee");
+
 	}
 
 }

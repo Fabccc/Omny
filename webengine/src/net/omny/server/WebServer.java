@@ -174,6 +174,9 @@ public abstract class WebServer {
 		BufferedReader br = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		String headerLine = br.readLine();
 		try {
+			if (headerLine == null) {
+				throw new MalformedRequestException("readLine() returns 'null'");
+			}
 			Request request = Request.lightWeight(headerLine);
 
 			int count = this.caching.countRequest(request.getPath());
@@ -186,7 +189,7 @@ public abstract class WebServer {
 				} catch (IllegalAccessException e) {
 					e.printStackTrace();
 				}
-			}else{
+			} else {
 				StringBuilder requestBuilder = new StringBuilder();
 				String line;
 				while ((line = br.readLine()) != null && !line.isBlank()) {

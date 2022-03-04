@@ -188,7 +188,7 @@ public class Router {
 			for (File subFile : file.listFiles())
 				routeFile(path + "/" + file.getName(), subFile);
 		}
-		Debug.debug("Routing {" + path + "/" + file.getName() + "}");
+		Debug.debug("Routing {" + path + "/" + file.getName() + "} [static]");
 		route(path + "/" + file.getName(), new LoadedFileRoute(file), Method.GET);
 	}
 
@@ -208,6 +208,7 @@ public class Router {
 			map.put(method, new RouteData(route));
 			this.routes.put(path, map);
 		}
+		Debug.debug("Routing {" + path + "} [dynamic "+method.toString()+"]");
 		return this;
 	}
 
