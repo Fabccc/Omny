@@ -37,6 +37,7 @@ public class HTTPUtils {
 	public static final String DOUBLE_CRLF = "\r\n\r\n";
 	public static final byte[] DOUBLE_CRLF_AS_BYTES = DOUBLE_CRLF.getBytes();
 	public static final byte SPACE_AS_BYTE = ' ';
+	public static final String DEFAULT_NAMESPACE = "__none__";
 
 	private static final Map<String, String> MIMES_TYPES = new HashMap<>();
 	

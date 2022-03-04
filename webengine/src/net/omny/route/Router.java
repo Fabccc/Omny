@@ -87,6 +87,12 @@ public class Router {
 	 */
 	public Router route(Object object) {
 		Class<?> clazz = object.getClass();
+		String nameSpace = HTTPUtils.DEFAULT_NAMESPACE;
+
+		if (clazz.isAnnotationPresent(RouterOptions.class)) {
+			RouterOptions options = clazz.getAnnotation(RouterOptions.class);
+			nameSpace = options.namespace();
+		}
 
 		for (java.lang.reflect.Method method : clazz.getDeclaredMethods()) {
 			if (method.canAccess(object)) {
@@ -101,7 +107,11 @@ public class Router {
 								// Both res and req are present as parameter
 								HTTP annotation = method.getAnnotation(HTTP.class);
 								// We get annotation content
-								route(annotation.url(), (req, res) -> {
+								String url = annotation.url();
+								if (!nameSpace.equals(HTTPUtils.DEFAULT_NAMESPACE)) {
+									url = nameSpace + "/" + url;
+								}
+								route(url, (req, res) -> {
 									return Ex.grab(() -> (View) method.invoke(object, req, res));
 								}, annotation.method());
 							}
@@ -116,7 +126,11 @@ public class Router {
 				if (field.isAnnotationPresent(HTTP.class)) {
 					if (Route.class.isAssignableFrom(field.getType())) {
 						HTTP annotation = field.getAnnotation(HTTP.class);
-						route(annotation.url(), Ex.grab(() -> (Route) field.get(object)), annotation.method());
+						String url = annotation.url();
+						if (!nameSpace.equals(HTTPUtils.DEFAULT_NAMESPACE)) {
+							url = nameSpace + "/" + url;
+						}
+						route(url, Ex.grab(() -> (Route) field.get(object)), annotation.method());
 					}
 				}
 			}
