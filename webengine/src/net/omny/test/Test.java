@@ -60,7 +60,7 @@ public class Test extends WebServer{
 		
 	}
 
-	@RouterOptions(namespace = "api")
+	@RouterOptions(namespace = "/api")
 	public static class NamespaceTestRouter{
 
 		@HTTP(url = "user")
