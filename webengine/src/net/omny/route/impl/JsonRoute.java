@@ -14,8 +14,12 @@ public class JsonRoute implements Route{
   @Getter
   private JsonView view;
 
-  private JsonRoute(){
-    this.view = new JsonView(new Gson());
+  public JsonRoute(Gson gson){
+    this.view = new JsonView(gson);
+  }
+
+  public JsonRoute(String string){
+    this.view = new JsonView(string);
   }
 
   @Override
