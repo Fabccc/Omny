@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.omny.route.handlers.DefaultHandler;
 import net.omny.route.handlers.PriorityHandler;
 import net.omny.route.handlers.RequestHandler;
@@ -46,27 +47,54 @@ public class Router {
 	protected Map<String, Map<Method, RouteData>> routes = new HashMap<>();
 	@Getter
 	protected EnumMap<PriorityHandler, List<RequestHandler>> handlers = new EnumMap<>(PriorityHandler.class);
+	@Getter
+	@Setter
+	private boolean routed;
+	private boolean main;
 
-	public Router() {
+	public Router(WebServer webServer) {
 		// By default
 		// This default handler handle static routing
 		// And non-params URL dependent
 		handler(new DefaultHandler());
+		this.main = true;
+	}
+
+	public Router() {
+		this.routed = false;
+		this.main = false;
+	}
+
+	public void route() {
 	}
 
 	// =========================================
 	// Routing functions
 
 	public Router route(Router router) {
+		if (router.isRouted())
+			return this;
+		router.route();
 		if (router instanceof NamedRouter namedRouter) {
-			this.routes.putAll(
-					router.routes.entrySet().stream()
-							.map(e -> MapUtils.changeEntry(e, path -> "/" + namedRouter.getNamespace() + path))
-							.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+			var routes = router.routes.entrySet().stream()
+					.map(e -> MapUtils.changeEntry(e, path -> "/" + namedRouter.getNamespace() + path))
+					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+			if (main) {
+				for (var entry : routes.entrySet()) {
+					for (var methods : entry.getValue().entrySet()) {
+
+						Debug.debug("Routing {" + entry.getKey() + "} [dynamic " + methods.getKey().toString() + "]");
+					}
+				}
+			}
+
+			this.routes.putAll(routes);
 			this.handlers.putAll(router.handlers);
-		}else{
+		} else {
 			appendRoutes(router, this);
 		}
+		router.setRouted(true);
 		return this;
 	}
 
@@ -125,6 +153,8 @@ public class Router {
 								if (!nameSpace.equals(HTTPUtils.DEFAULT_NAMESPACE)) {
 									url = nameSpace + "/" + url;
 								}
+								if (main)
+									Debug.debug("Routing {" + url + "} [dynamic " + annotation.method().toString() + "]");
 								route(url, (req, res) -> {
 									return Ex.grab(() -> (View) method.invoke(object, req, res));
 								}, annotation.method());
@@ -144,6 +174,8 @@ public class Router {
 						if (!nameSpace.equals(HTTPUtils.DEFAULT_NAMESPACE)) {
 							url = nameSpace + "/" + url;
 						}
+						if (main)
+							Debug.debug("Routing {" + url + "} [dynamic " + annotation.method().toString() + "]");
 						route(url, Ex.grab(() -> (Route) field.get(object)), annotation.method());
 					}
 				}
@@ -202,7 +234,8 @@ public class Router {
 			for (File subFile : file.listFiles())
 				routeFile(path + "/" + file.getName(), subFile);
 		}
-		Debug.debug("Routing {" + path + "/" + file.getName() + "} [static]");
+		if (main)
+			Debug.debug("Routing {" + path + "/" + file.getName() + "} [static]");
 		route(path + "/" + file.getName(), new LoadedFileRoute(file), Method.GET);
 	}
 
@@ -222,7 +255,6 @@ public class Router {
 			map.put(method, new RouteData(route));
 			this.routes.put(path, map);
 		}
-		Debug.debug("Routing {" + path + "} [dynamic " + method.toString() + "]");
 		return this;
 	}
 
@@ -285,16 +317,6 @@ public class Router {
 					// Then we must stop processing more
 					return true;
 			}
-		}
-		// Static routing
-		if (this.routes.containsKey(request.getPath())) {
-			if (this.routes.get(request.getPath()).containsKey(request.getMethod())) {
-				RouteData routeData = this.routes.get(request.getPath()).get(request.getMethod());
-				Debug.debug("Found static route for " + request.getPath());
-				sendCorrect(client, routeData, request);
-				return true;
-			}
-
 		}
 
 		// Dynamic routing

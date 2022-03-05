@@ -78,7 +78,7 @@ public abstract class WebServer {
 
 	// Default fields
 	@Getter
-	private Router router = new Router();
+	private Router router = new Router(this);
 	@Getter
 	protected int port = (int) ConfigFile.DEFAULT_PORT;
 	@Getter
@@ -135,6 +135,7 @@ public abstract class WebServer {
 		// -> handling routes
 		// -> FUTURE : handling middleware
 		route(this.router);
+		this.router.setRouted(true);
 	}
 
 	/**

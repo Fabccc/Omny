@@ -11,14 +11,4 @@ public class NamedRouter extends Router {
         this.namespace = namespace;
     }
 
-    @Override
-    public Router route(String path, String filePath) {
-        return super.route("/" + namespace + path, filePath);
-    }
-
-    @Override
-    public Router route(String path, Route route, Method method) {
-        return super.route("/" + namespace + path, route, method);
-    }
-
 }
