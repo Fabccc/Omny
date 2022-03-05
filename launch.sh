@@ -1,7 +1,7 @@
 #!/bin/bash
 
 webserver="webserver.jar"
-main_jar="webengine-0.0.1-jar-test.jar"
+main_jar="omny-test-server.jar"
 
 # If the file already exists, remove it
 if [ -f "$webserver" ]; then
