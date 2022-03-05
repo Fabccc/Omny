@@ -12,6 +12,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 import net.omny.route.handlers.DefaultHandler;
@@ -24,6 +25,7 @@ import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
 import net.omny.utils.HTTPUtils.Version;
+import net.omny.utils.MapUtils;
 import net.omny.utils.Primitive;
 import net.omny.views.View;
 
@@ -41,9 +43,9 @@ public class Router {
 	}
 
 	@Getter
-	private Map<String, Map<Method, RouteData>> routes = new HashMap<>();
+	protected Map<String, Map<Method, RouteData>> routes = new HashMap<>();
 	@Getter
-	private EnumMap<PriorityHandler, List<RequestHandler>> handlers = new EnumMap<>(PriorityHandler.class);
+	protected EnumMap<PriorityHandler, List<RequestHandler>> handlers = new EnumMap<>(PriorityHandler.class);
 
 	public Router() {
 		// By default
@@ -56,9 +58,21 @@ public class Router {
 	// Routing functions
 
 	public Router route(Router router) {
-		this.routes.putAll(router.routes);
-		this.handlers.putAll(router.handlers);
+		if (router instanceof NamedRouter namedRouter) {
+			this.routes.putAll(
+					router.routes.entrySet().stream()
+							.map(e -> MapUtils.changeEntry(e, path -> "/" + namedRouter.getNamespace() + path))
+							.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+			this.handlers.putAll(router.handlers);
+		}else{
+			appendRoutes(router, this);
+		}
 		return this;
+	}
+
+	protected void appendRoutes(Router source, Router destination) {
+		destination.routes.putAll(source.routes);
+		destination.handlers.putAll(source.handlers);
 	}
 
 	/**
@@ -208,7 +222,7 @@ public class Router {
 			map.put(method, new RouteData(route));
 			this.routes.put(path, map);
 		}
-		Debug.debug("Routing {" + path + "} [dynamic "+method.toString()+"]");
+		Debug.debug("Routing {" + path + "} [dynamic " + method.toString() + "]");
 		return this;
 	}
 

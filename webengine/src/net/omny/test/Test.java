@@ -4,6 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import net.omny.route.HTTP;
+import net.omny.route.NamedRouter;
 import net.omny.route.Request;
 import net.omny.route.Response;
 import net.omny.route.Route;
@@ -41,6 +42,7 @@ public class Test extends WebServer{
 	public void route(Router router) {
 		router.route(TestRouter.class);
 		router.route(NamespaceTestRouter.class);
+		router.route(new NestedRouter1());
 		router.staticRoute("./webengine/static");
 	}
 	
@@ -60,11 +62,39 @@ public class Test extends WebServer{
 		
 	}
 
-	@RouterOptions(namespace = "/api")
+	@RouterOptions(namespace = "/test")
 	public static class NamespaceTestRouter{
 
 		@HTTP(url = "user")
 		public Route userApi = new TextRoute("Oula bizarrrreee");
+
+	}
+
+	public static class NestedRouter1 extends NamedRouter{
+
+		public NestedRouter1() {
+			super("api");
+		}
+
+		@Override
+		public Router route(Router router) {
+			// TODO Auto-generated method stub
+			return super.route(router);
+		}
+
+	}
+
+	public static class NestedRouter2 extends NamedRouter{
+
+		public NestedRouter2() {
+			super("user");
+		}
+
+		@Override
+		public Router route(Router router) {
+			// TODO Auto-generated method stub
+			return super.route(router);
+		}
 
 	}
 
