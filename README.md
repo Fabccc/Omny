@@ -29,6 +29,10 @@ Java lightweight web serverside framework
 - [ ] Features from the framework
   - [ ] Namespaces
   - [ ] More ...
+- [ ] Support HTTP version
+  - [ ] HTTP/1.1
+  - [ ] HTTP/2
+  - [ ] HTTP/3
 
 
 ## Microbenching test can be found under `jmh-test/` folder
