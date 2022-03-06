@@ -190,4 +190,20 @@ public final class Request {
 		return this.headers.get(header.toLowerCase());
 	}
 
+	/**
+	 * Return whatever a specified header is contained in the parsed HTTP request
+	 * Example:
+	 * 
+	 * getHeader("host") => true
+	 * getHeader("non-existing") => false
+	 * 
+	 * @author Fabien CAYRE (Computer)
+	 *
+	 * @param header
+	 * @return True if it contains, False otherwise
+	 */
+	public boolean containsHeader(String header) {
+		return this.headers.containsKey(header.toLowerCase());
+	}
+
 }
