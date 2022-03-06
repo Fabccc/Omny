@@ -13,6 +13,7 @@ import net.omny.route.Route;
 import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
+import net.omny.utils.HTTPUtils.Headers;
 import net.omny.views.FileView;
 import net.omny.views.View;
 
@@ -80,7 +81,7 @@ public class FileRoute implements Route{
 			if(mimeType.equals("application/x-msdownload")) {
 				res.setBinary(true);
 			}
-			res.setHeader("Content-Type", mimeType);
+			res.setHeader(Headers.CONTENT_TYPE, mimeType);
 		});
 		return this.fileView;
 	}

@@ -31,6 +31,15 @@ public class HTTPUtils {
 		}
 		
 	}
+
+	public static class Headers {
+		public static final String ACCEPT_DATETIME = "Accept-Datetime";
+		public static final String ACCEPT_CHARSET = "Accept-Charset";
+		public static final String ACCEPT_ENCODING = "Accept-Encoding";
+		public static final String ACCEPT_LANGUAGE = "Accept-Language";
+		public static final String CONTENT_TYPE = "Content-Type";
+		public static final String CACHE_CONTROL = "Cache-Control";
+	}
 	
 	public static final String CRLF = "\r\n";
 	public static final byte[] CRLF_AS_BYTES = CRLF.getBytes();

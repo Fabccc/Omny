@@ -9,6 +9,7 @@ import net.omny.route.Request;
 import net.omny.route.Response;
 import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
+import net.omny.utils.HTTPUtils.Headers;
 import net.omny.views.View;
 
 public class LoadedFileRoute extends FileRoute {
@@ -37,7 +38,7 @@ public class LoadedFileRoute extends FileRoute {
       if (mimeType.equals("application/x-msdownload")) {
         res_.setBinary(true);
       }
-      res_.setHeader("Content-Type", mimeType);
+      res_.setHeader(Headers.CONTENT_TYPE, mimeType);
 
       res_.addBody(this.bytes);
     };
