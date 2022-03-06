@@ -345,24 +345,11 @@ public class Router {
 				continue RouteLoop;
 			}
 			// We compare each division
-			Map<String, String> params = new HashMap<>();
-			for (int i = 0; i < currentUrlDivision.length; i++) {
-				if (!division[i].equals(currentUrlDivision[i])) {
-					// Path are different
-					continue RouteLoop;
-				}
-				if (division[i].startsWith(":")) {
-					// If it's a URL param
-					String paramName = division[i].substring(1);
-					String paramValue = currentUrlDivision[i];
-					params.put(paramName, paramValue);
-				}
-			}
 			Debug.debug("Found route for " + request.getPath());
 
 			// current division path are the same
 			// It's the same route
-			request.setParams(params);
+			request.setParams(request.extractParams(path));
 			sendCorrect(client, routeData, request);
 			return true;
 		}
