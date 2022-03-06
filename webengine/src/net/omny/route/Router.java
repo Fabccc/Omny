@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.omny.route.handlers.DefaultHandler;
-import net.omny.route.handlers.PriorityHandler;
-import net.omny.route.handlers.RequestHandler;
 import net.omny.route.impl.FileRoute;
 import net.omny.route.impl.LoadedFileRoute;
+import net.omny.route.middleware.Middleware;
+import net.omny.route.middleware.MiddlewarePriority;
+import net.omny.route.middleware.StaticFileMiddleware;
 import net.omny.server.WebServer;
 import net.omny.utils.Debug;
 import net.omny.utils.Ex;
@@ -46,7 +46,7 @@ public class Router {
 	@Getter
 	protected Map<String, Map<Method, RouteData>> routes = new HashMap<>();
 	@Getter
-	protected EnumMap<PriorityHandler, List<RequestHandler>> handlers = new EnumMap<>(PriorityHandler.class);
+	protected EnumMap<MiddlewarePriority, List<Middleware>> middlewares = new EnumMap<>(MiddlewarePriority.class);
 	@Getter
 	@Setter
 	private boolean routed;
@@ -56,7 +56,7 @@ public class Router {
 		// By default
 		// This default handler handle static routing
 		// And non-params URL dependent
-		handler(new DefaultHandler());
+		middleware(new StaticFileMiddleware());
 		this.main = true;
 	}
 
@@ -90,7 +90,7 @@ public class Router {
 			}
 
 			this.routes.putAll(routes);
-			this.handlers.putAll(router.handlers);
+			this.middlewares.putAll(router.middlewares);
 		} else {
 			appendRoutes(router, this);
 		}
@@ -100,7 +100,7 @@ public class Router {
 
 	protected void appendRoutes(Router source, Router destination) {
 		destination.routes.putAll(source.routes);
-		destination.handlers.putAll(source.handlers);
+		destination.middlewares.putAll(source.middlewares);
 	}
 
 	/**
@@ -271,8 +271,8 @@ public class Router {
 	 * @param handler The request handler
 	 * @return The router object
 	 */
-	public Router handler(RequestHandler handler) {
-		return handler(handler, PriorityHandler.DEFAULT);
+	public Router middleware(Middleware handler) {
+		return middleware(handler, MiddlewarePriority.BEFORE);
 	}
 
 	/**
@@ -282,17 +282,17 @@ public class Router {
 	 * @param priority The priority of this handler
 	 * @return The router object
 	 */
-	public Router handler(RequestHandler handler, PriorityHandler priority) {
-		if (this.handlers.containsKey(priority)) {
+	public Router middleware(Middleware handler, MiddlewarePriority priority) {
+		if (this.middlewares.containsKey(priority)) {
 			// This priority already exists and there is a list linked to
-			this.handlers.get(priority).add(handler);
+			this.middlewares.get(priority).add(handler);
 		} else {
 			// This priority doesn't exists
 			// We must create a new List containing the handler
 			// Then put it to this priority
-			List<RequestHandler> list = new ArrayList<>();
+			List<Middleware> list = new ArrayList<>();
 			list.add(handler);
-			this.handlers.put(priority, list);
+			this.middlewares.put(priority, list);
 		}
 		return this;
 	}
@@ -309,14 +309,15 @@ public class Router {
 	 */
 	public boolean handleRoute(WebServer webServer, Request request, Socket client) throws IOException {
 
-		// Processing request handlers...
-		for (PriorityHandler priority : this.handlers.keySet()) {
-			for (RequestHandler handler : this.handlers.get(priority)) {
-				if (handler.handle(webServer, this, request, client))
+		
+		// Processing request middlewares...
+		for (Middleware middleware : 
+			this.middlewares.getOrDefault(MiddlewarePriority.BEFORE, List.of())) {
+				if(middleware.handle(webServer, this, request, client)){
 					// If handler returns true
 					// Then we must stop processing more
 					return true;
-			}
+				}
 		}
 
 		// Dynamic routing

@@ -1,4 +1,4 @@
-package net.omny.route.handlers;
+package net.omny.route.middleware;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -10,7 +10,7 @@ import net.omny.server.WebServer;
 /**
  * Interface 
  */
-public interface RequestHandler {
+public interface Middleware {
   
   /**
    * Handling request from a client

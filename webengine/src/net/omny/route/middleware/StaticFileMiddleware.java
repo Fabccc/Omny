@@ -1,4 +1,4 @@
-package net.omny.route.handlers;
+package net.omny.route.middleware;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import net.omny.utils.Debug;
 import net.omny.utils.HTTPUtils;
 import net.omny.views.View;
 
-public class DefaultHandler implements RequestHandler {
+public class StaticFileMiddleware implements Middleware {
 
 	@Override
 	public boolean handle(WebServer webServer, Router router, Request request, Socket client)
