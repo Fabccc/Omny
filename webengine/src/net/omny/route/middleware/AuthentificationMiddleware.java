@@ -8,7 +8,7 @@ import net.omny.route.Router;
 import net.omny.server.WebServer;
 import net.omny.utils.HTTPUtils.Headers;
 
-public abstract class AuthentificationMiddleware implements Middleware {
+public abstract class AuthentificationMiddleware implements Middleware, UrlMiddleware {
 
   private String url;
 
@@ -26,5 +26,15 @@ public abstract class AuthentificationMiddleware implements Middleware {
   }
 
   public abstract boolean auth(Request request);
+
+  @Override
+  public String getUrl() {
+      return this.url;
+  }
+
+  @Override
+  public void setUrl(String url) {
+      this.url = url;
+  }
 
 }

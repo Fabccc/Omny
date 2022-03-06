@@ -21,6 +21,7 @@ import net.omny.route.impl.LoadedFileRoute;
 import net.omny.route.middleware.Middleware;
 import net.omny.route.middleware.MiddlewarePriority;
 import net.omny.route.middleware.StaticFileMiddleware;
+import net.omny.route.middleware.UrlMiddleware;
 import net.omny.server.WebServer;
 import net.omny.utils.Debug;
 import net.omny.utils.Ex;
@@ -90,16 +91,26 @@ public class Router {
 			}
 
 			this.routes.putAll(routes);
-			this.middlewares.putAll(router.middlewares);
+			var middlewares = router.middlewares
+					.entrySet()
+					.stream()
+					.map(entry -> MapUtils.changeValue(entry, list -> list.stream().peek(middleware -> {
+						if (middleware instanceof UrlMiddleware urlMiddleware) {
+							urlMiddleware.setUrl("/" + namedRouter.getNamespace() + urlMiddleware.getUrl());
+						}
+					}).toList()))
+					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+			this.middlewares.putAll(middlewares);
 		} else {
-			appendRoutes(router, this);
+			this.middlewares.putAll(router.middlewares);
+			this.routes.putAll(router.routes);
 		}
+
 		router.setRouted(true);
 		return this;
 	}
 
 	protected void appendRoutes(Router source, Router destination) {
-		destination.routes.putAll(source.routes);
 		destination.middlewares.putAll(source.middlewares);
 	}
 
@@ -154,7 +165,8 @@ public class Router {
 									url = nameSpace + "/" + url;
 								}
 								if (main)
-									Debug.debug("Routing {" + url + "} [dynamic " + annotation.method().toString() + "]");
+									Debug.debug(
+											"Routing {" + url + "} [dynamic " + annotation.method().toString() + "]");
 								route(url, (req, res) -> {
 									return Ex.grab(() -> (View) method.invoke(object, req, res));
 								}, annotation.method());
@@ -227,6 +239,14 @@ public class Router {
 			}
 		}
 		return this;
+	}
+
+	public <T extends Middleware> List<T> getMiddlewares(MiddlewarePriority priority, Class<? extends T> clazz){
+		return this.middlewares.get(priority)
+			.stream()
+			.filter(s -> clazz.isAssignableFrom(s.getClass()))
+			.map(s -> (T) s)
+			.toList();
 	}
 
 	private void routeFile(String path, File file) {
@@ -309,15 +329,13 @@ public class Router {
 	 */
 	public boolean handleRoute(WebServer webServer, Request request, Socket client) throws IOException {
 
-		
 		// Processing request middlewares...
-		for (Middleware middleware : 
-			this.middlewares.getOrDefault(MiddlewarePriority.BEFORE, List.of())) {
-				if(middleware.handle(webServer, this, request, client)){
-					// If handler returns true
-					// Then we must stop processing more
-					return true;
-				}
+		for (Middleware middleware : this.middlewares.getOrDefault(MiddlewarePriority.BEFORE, List.of())) {
+			if (middleware.handle(webServer, this, request, client)) {
+				// If handler returns true
+				// Then we must stop processing more
+				return true;
+			}
 		}
 
 		// Dynamic routing

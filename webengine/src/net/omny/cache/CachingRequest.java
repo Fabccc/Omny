@@ -12,23 +12,26 @@ import net.omny.server.WebServer;
 
 public class CachingRequest {
 
-    private static final byte[] EMPTY = {}; 
+    private static final byte[] EMPTY = {};
 
     private Map<String, CachedRequest> cache = new HashMap<>();
 
-    public CachingRequest(WebServer webServer){
-        webServer.getThreadPool().scheduleAtFixedRate(() -> {
-            updateCache();
-        }, 50, 2*1000, TimeUnit.MILLISECONDS);
+    public CachingRequest(WebServer webServer) {
+        if (webServer.getThreadPool() != null) {
+            webServer.getThreadPool().scheduleAtFixedRate(() -> {
+                updateCache();
+            }, 50, 2 * 1000, TimeUnit.MILLISECONDS);
+        }
+
         // Update the cache each 2 seconds
     }
 
-    public CachingRequest(){
+    public CachingRequest() {
     }
 
     /**
      * 
-     * @param path     The path of the URL of the request
+     * @param path The path of the URL of the request
      * @return
      */
     public int countRequest(String path) {
@@ -38,12 +41,12 @@ public class CachingRequest {
         return rq.isTimedOut() ? 0 : rq.count.get();
     }
 
-    public void cacheRequest(String path) throws IllegalAccessException{
+    public void cacheRequest(String path) throws IllegalAccessException {
         if (cache.containsKey(path)) {
             var rq = cache.get(path);
             rq.updateAt = System.currentTimeMillis();
             rq.count.incrementAndGet();
-        }else{
+        } else {
             throw new IllegalAccessException("You must cache the request first with the content");
         }
     }
@@ -84,7 +87,6 @@ public class CachingRequest {
     public void updateCache() {
         Set<Entry<String, CachedRequest>> cacheEntry = this.cache.entrySet();
 
-
         for (var entry : cacheEntry) {
             var rq = entry.getValue();
             if (rq.isTimedOut()) {
@@ -103,8 +105,8 @@ public class CachingRequest {
         public long updateAt;
         public AtomicInteger count;
 
-        public boolean isTimedOut(){
-            return updateAt + time <  System.currentTimeMillis();
+        public boolean isTimedOut() {
+            return updateAt + time < System.currentTimeMillis();
         }
 
     }

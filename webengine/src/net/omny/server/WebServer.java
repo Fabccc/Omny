@@ -78,7 +78,7 @@ public abstract class WebServer {
 
 	// Default fields
 	@Getter
-	private Router router = new Router(this);
+	protected Router router = new Router(this);
 	@Getter
 	protected int port = (int) ConfigFile.DEFAULT_PORT;
 	@Getter
@@ -126,11 +126,11 @@ public abstract class WebServer {
 		return toml;
 	}
 
-	private void postInit() {
+	protected void postInit() {
 		this.caching = new CachingRequest(this);
 	}
 
-	private void init() {
+	protected void init() {
 		// TODO init the web server
 		// -> handling routes
 		// -> FUTURE : handling middleware

@@ -9,6 +9,10 @@ public abstract class LoginPasswordMiddleware extends AuthentificationMiddleware
         super(url);
     }
 
+    public LoginPasswordMiddleware() {
+        super("");
+    }
+
     @Override
     public boolean auth(Request request) {
         String auth = request.getHeader(Headers.AUTHORIZATION);
