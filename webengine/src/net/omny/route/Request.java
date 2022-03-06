@@ -28,8 +28,8 @@ public final class Request {
 	// Sec-Fetch-Site: none
 	// Sec-Fetch-User: ?1
 
-	public static Request lightWeight(String headerLine) 
-		throws MalformedRequestException {
+	public static Request lightWeight(String headerLine)
+			throws MalformedRequestException {
 		return new Request(headerLine);
 	}
 
@@ -111,12 +111,52 @@ public final class Request {
 		}
 	}
 
-	public void readFurther(String nextLines){
+	public void readFurther(String nextLines) {
 		String[] lines = nextLines.split("\r\n");
 		for (int i = 0; i < lines.length; i++) {
 			String[] headerLines = lines[i].split(":\\s+");
 			this.headers.put(headerLines[0].toLowerCase(), headerLines[1]);
 		}
+	}
+
+	public boolean equalsPath(String path, boolean params) {
+		if (!params) {
+			return this.path.equals(path);
+		}
+		String[] urlDivions = path.split("\\/");
+		String[] currentUrlDivision = this.path.split("\\/");
+
+		// The number of division is different from the current request division
+		if (urlDivions.length != currentUrlDivision.length) {
+			return false;
+		}
+		for (int i = 0; i < currentUrlDivision.length; i++) {
+			if (!urlDivions[i].equals(currentUrlDivision[i])) {
+				if(!urlDivions[i].startsWith(":"))
+					return false;
+			}
+		}
+		return true;
+	}
+
+	public Map<String, String> extractParams(String path){
+		String[] urlDivions = path.split("\\/");
+		String[] currentUrlDivision = this.path.split("\\/");
+
+		// The number of division is different from the current request division
+		if (urlDivions.length != currentUrlDivision.length) {
+			return null;
+		}
+		Map<String, String> params = new HashMap<>();
+		for (int i = 0; i < currentUrlDivision.length; i++) {
+			if (!urlDivions[i].equals(currentUrlDivision[i])) {
+				if(urlDivions[i].startsWith(":")){
+					params.put(urlDivions[i].substring(1), currentUrlDivision[i]);
+				}
+					
+			}
+		}
+		return params;
 	}
 
 	/**

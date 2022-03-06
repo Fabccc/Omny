@@ -331,8 +331,8 @@ public class Router {
 			// String"
 
 			// TODO use Regex for better handling
-			String[] division = path.split("\\\\");
-			String[] currentUrlDivision = request.getPath().split("\\\\");
+			String[] division = path.split("\\/");
+			String[] currentUrlDivision = request.getPath().split("\\/");
 
 			// The number of division is different from the current request division
 			if (division.length != currentUrlDivision.length) {
