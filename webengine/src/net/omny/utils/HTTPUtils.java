@@ -1,5 +1,8 @@
 package net.omny.utils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,24 +15,24 @@ public class HTTPUtils {
 		V1_1("HTTP/1.1"),
 		V2("HTTP/2"),
 		V3("HTTP/3");
-		
+
 		public static Version byTag(String tag) {
-			for(Version v : Version.values())
-				if(v.tag.equals(tag))
+			for (Version v : Version.values())
+				if (v.tag.equals(tag))
 					return v;
 			return V1_1;
 		}
-		
+
 		@Getter
 		private final String tag;
-		@Getter 
+		@Getter
 		private final byte[] tagAsByte;
 
 		private Version(String tag) {
 			this.tag = tag;
 			this.tagAsByte = this.tag.getBytes();
 		}
-		
+
 	}
 
 	public static class Headers {
@@ -40,7 +43,7 @@ public class HTTPUtils {
 		public static final String CONTENT_TYPE = "Content-Type";
 		public static final String CACHE_CONTROL = "Cache-Control";
 	}
-	
+
 	public static final String CRLF = "\r\n";
 	public static final byte[] CRLF_AS_BYTES = CRLF.getBytes();
 	public static final String DOUBLE_CRLF = "\r\n\r\n";
@@ -49,14 +52,15 @@ public class HTTPUtils {
 	public static final String DEFAULT_NAMESPACE = "__none__";
 
 	private static final Map<String, String> MIMES_TYPES = new HashMap<>();
-	
+
 	static {
 		MIMES_TYPES.put(".js", "application/javascript");
 		MIMES_TYPES.put(".exe", "application/vnd.microsoft.portable-executable");
 	}
-	
+
 	/**
 	 * Find MIME types of files
+	 * 
 	 * @author Fabien CAYRE (Computer)
 	 *
 	 * @param filePath Path to the file
@@ -65,12 +69,19 @@ public class HTTPUtils {
 	 */
 	public static String findMime(String filePath) {
 		return MIMES_TYPES.entrySet()
-			.stream()
-			.filter(entry -> filePath.endsWith(entry.getKey()))
-			.map(Map.Entry::getValue)
-			.findFirst()
-			.orElse("text/plain");
+				.stream()
+				.filter(entry -> filePath.endsWith(entry.getKey()))
+				.map(Map.Entry::getValue)
+				.findFirst()
+				.orElse("text/plain");
 	}
-	
-	
+
+	public static String urlEncode(String base, String charset) throws UnsupportedEncodingException {
+		return URLEncoder.encode(base, charset);
+	}
+
+	public static String urlDecode(String base, String charset) throws UnsupportedEncodingException {
+		return URLDecoder.decode(base, charset);
+	}
+
 }
