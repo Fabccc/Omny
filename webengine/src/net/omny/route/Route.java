@@ -1,9 +1,16 @@
 package net.omny.route;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.omny.views.View;
 
-public interface Route {
+public abstract class Route {
 	
-	View handle(Request req, Response res);
+	@Getter @Setter
+	private boolean allowCache = true;
+	@Getter @Setter
+	private long lastInCache = 100;
+
+	public abstract View handle(Request req, Response res);
 	
 }
