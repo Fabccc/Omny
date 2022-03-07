@@ -30,6 +30,9 @@ public class StaticFileMiddleware implements Middleware {
 			// Here findRoute is not null
 			RouteData routeData = null;
 			if ((routeData = findRoute.get(request.getMethod())) != null) {
+				if(!routeData.isStatic()){
+					return false;// do not process this
+				}
 				// Here routeData is not null
 				Route route = routeData.getRoute();
 
@@ -63,7 +66,7 @@ public class StaticFileMiddleware implements Middleware {
 					} else {
 						byteContent.push(response.toStringAsByte());
 					}
-					webServer.getCaching().cacheRequest(request.getPath(), byteContent.getBackedArray(), 1000);
+					webServer.getCaching().cacheRequest(request.getPath(), byteContent.getBackedArray(), 10000);
 					Debug.debug("caching request ");
 				} else {
 					webServer.getCaching().updateCache();

@@ -8,5 +8,7 @@ public class RouteData {
   
   @Getter
   private Route route;
+  @Getter
+  private boolean isStatic;
 
 }
