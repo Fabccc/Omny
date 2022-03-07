@@ -23,7 +23,7 @@ import net.omny.views.View;
  *
  * @date 08/08/2021
  */
-public class FileRoute implements Route{
+public class FileRoute extends Route{
 
 	/**
 	 * The path to the file (relative)

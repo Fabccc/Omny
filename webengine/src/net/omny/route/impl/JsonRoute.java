@@ -10,10 +10,10 @@ import net.omny.utils.HTTPUtils.Headers;
 import net.omny.views.JsonView;
 import net.omny.views.View;
 
-public class JsonRoute implements Route{
+public class JsonRoute extends Route{
 
   @Getter
-  private JsonView view;
+  protected JsonView view;
 
   public JsonRoute(Gson gson){
     this.view = new JsonView(gson);

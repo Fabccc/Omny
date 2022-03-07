@@ -12,10 +12,12 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.omny.route.impl.AnonymousRoute;
 import net.omny.route.impl.FileRoute;
 import net.omny.route.impl.LoadedFileRoute;
 import net.omny.route.middleware.Middleware;
@@ -23,6 +25,7 @@ import net.omny.route.middleware.MiddlewarePriority;
 import net.omny.route.middleware.StaticFileMiddleware;
 import net.omny.route.middleware.UrlMiddleware;
 import net.omny.server.WebServer;
+import net.omny.utils.ByteStack;
 import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
@@ -241,23 +244,22 @@ public class Router {
 		return this;
 	}
 
-	
 	/**
 	 * Return a list of middleware that is instanceof the class
 	 * And has a specified priority
 	 * 
-	 * @param <T> the type of Middleware
+	 * @param <T>      the type of Middleware
 	 * @param priority the priority
 	 * @param clazz
 	 * @return The list of all the middleware corresponding to this parameters
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends Middleware> List<T> getMiddlewares(MiddlewarePriority priority, Class<? extends T> clazz){
+	public <T extends Middleware> List<T> getMiddlewares(MiddlewarePriority priority, Class<? extends T> clazz) {
 		return this.middlewares.get(priority)
-			.stream()
-			.filter(s -> clazz.isAssignableFrom(s.getClass()))
-			.map(s -> (T) s)
-			.toList();
+				.stream()
+				.filter(s -> clazz.isAssignableFrom(s.getClass()))
+				.map(s -> (T) s)
+				.toList();
 	}
 
 	private void routeFile(String path, File file) {
@@ -267,10 +269,18 @@ public class Router {
 		}
 		if (main)
 			Debug.debug("Routing {" + path + "/" + file.getName() + "} [static]");
-		route(path + "/" + file.getName(), new LoadedFileRoute(file), Method.GET);
+		route(path + "/" + file.getName(), new LoadedFileRoute(file), Method.GET, true);
+	}
+
+	public Router route(String path, BiFunction<Request, Response, View> route, Method method) {
+		return route(path, new AnonymousRoute(route), method);
 	}
 
 	public Router route(String path, Route route, Method method) {
+		return route(path, route, method, false);
+	}
+
+	public Router route(String path, Route route, Method method, boolean isStatic) {
 		if (this.routes.containsKey(path)) {
 			// It already contains path with a map
 			if (this.routes.get(path).containsKey(method)) {
@@ -279,18 +289,19 @@ public class Router {
 				throw new IllegalStateException("There is already a route with this path AND method");
 			} else
 				// We add this routes
-				this.routes.get(path).put(method, new RouteData(route));
+				this.routes.get(path).put(method, new RouteData(route, isStatic));
 		} else {
 			// there is no path with this name
 			Map<Method, RouteData> map = new HashMap<>();
-			map.put(method, new RouteData(route));
+			map.put(method, new RouteData(route, isStatic));
 			this.routes.put(path, map);
 		}
 		return this;
 	}
 
 	/**
-	 * Add a route to the router with the specified path, that returns the content of the file
+	 * Add a route to the router with the specified path, that returns the content
+	 * of the file
 	 * 
 	 * @param path
 	 * @param filePath The path to the file
@@ -386,7 +397,7 @@ public class Router {
 			// current division path are the same
 			// It's the same route
 			request.setParams(request.extractParams(path));
-			sendCorrect(client, routeData, request);
+			sendCorrect(webServer, client, routeData, request);
 			return true;
 		}
 		// Returning a 404 Not Found
@@ -407,7 +418,8 @@ public class Router {
 		return false;
 	}
 
-	public void sendCorrect(Socket client, RouteData routeData, Request request) throws IOException {
+	public void sendCorrect(WebServer webServer, Socket client, RouteData routeData, Request request)
+			throws IOException {
 		Response response = new Response(request);
 
 		View view = routeData.getRoute().handle(request, response);
@@ -431,6 +443,26 @@ public class Router {
 			clientWriter.write(response.toString());
 			// Flush the stream
 			clientWriter.flush();
+		}
+
+		if (routeData.getRoute().isAllowCache()) {
+			if (webServer.getCaching().countRequest(request.getPath()) == 0) {
+				// we must cache it
+				ByteStack byteContent = new ByteStack();
+				if (response.isBinary()) {
+					byteContent.push(response.toString().getBytes(StandardCharsets.UTF_8));
+					byteContent.push(response.getBody().getBackedArray());
+					byteContent.push(HTTPUtils.DOUBLE_CRLF_AS_BYTES);
+				} else {
+					byteContent.push(response.toStringAsByte());
+				}
+				webServer.getCaching().cacheRequest(request.getPath(), byteContent.getBackedArray(),
+						routeData.getRoute().getLastInCache());
+				Debug.debug("caching request ");
+
+			} else {
+				webServer.getCaching().updateCache();
+			}
 		}
 	}
 

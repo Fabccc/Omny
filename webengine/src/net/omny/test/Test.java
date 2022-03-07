@@ -2,8 +2,7 @@ package net.omny.test;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
-import com.google.gson.Gson;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.omny.route.HTTP;
 import net.omny.route.Method;
@@ -18,6 +17,7 @@ import net.omny.route.impl.JsonRoute;
 import net.omny.route.impl.TextRoute;
 import net.omny.server.WebServer;
 import net.omny.utils.Debug;
+import net.omny.views.JsonView;
 import net.omny.views.TextView;
 import net.omny.views.View;
 
@@ -96,14 +96,31 @@ public class Test extends WebServer {
 
 		@Override
 		public void route() {
-			route("/name", new JsonRoute(new Gson().toJson(new UserJson())), Method.GET);
+			route("/name", new ApiUserNameRoute(), Method.GET);
 		}
 
 	}
 
-	public static class UserJson {
+	public static class ApiUserNameRoute extends JsonRoute {
 
-		public String name = "Sammy";
+		private AtomicInteger test;
+
+		public ApiUserNameRoute() {
+			super("");
+			this.test = new AtomicInteger();
+			this.setAllowCache(true);
+			this.setLastInCache(100);
+		}
+
+		@Override
+		public View handle(Request req, Response res) {
+			super.handle(req, res);
+			return new JsonView("""
+					{
+						"value": %d
+					}
+					""".formatted(test.incrementAndGet()));
+		}
 
 	}
 

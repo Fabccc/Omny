@@ -7,7 +7,7 @@ import net.omny.utils.HTTPUtils.Headers;
 import net.omny.views.TextView;
 import net.omny.views.View;
 
-public class TextRoute implements Route{
+public class TextRoute extends Route{
 
 	private TextView view;
 
