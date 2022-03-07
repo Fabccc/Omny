@@ -241,6 +241,17 @@ public class Router {
 		return this;
 	}
 
+	
+	/**
+	 * Return a list of middleware that is instanceof the class
+	 * And has a specified priority
+	 * 
+	 * @param <T> the type of Middleware
+	 * @param priority the priority
+	 * @param clazz
+	 * @return The list of all the middleware corresponding to this parameters
+	 */
+	@SuppressWarnings("unchecked")
 	public <T extends Middleware> List<T> getMiddlewares(MiddlewarePriority priority, Class<? extends T> clazz){
 		return this.middlewares.get(priority)
 			.stream()
@@ -278,6 +289,13 @@ public class Router {
 		return this;
 	}
 
+	/**
+	 * Add a route to the router with the specified path, that returns the content of the file
+	 * 
+	 * @param path
+	 * @param filePath The path to the file
+	 * @return this
+	 */
 	public Router route(String path, String filePath) {
 		return route(path, new FileRoute(filePath), Method.GET);
 	}
