@@ -23,6 +23,12 @@ public class Response {
 	// Connection: Closed
 	// Content-Type: text/html; charset=iso-8859-1
 
+	public static Response noPermission(Request request){
+		Response response = new Response(Code.E401_UNAUTHORIZED, request.getHttpVersion());
+		response.binary = false;
+		return response;
+	}
+
 	@Getter
 	@Setter
 	private Code responseCode = Code.S200_OK;
