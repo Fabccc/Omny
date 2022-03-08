@@ -20,16 +20,18 @@ import lombok.Getter;
 import lombok.Setter;
 import net.omny.route.impl.AnonymousRoute;
 import net.omny.route.impl.FileRoute;
+import net.omny.route.impl.HtmlRoute;
 import net.omny.route.impl.LoadedFileRoute;
 import net.omny.route.middleware.Middleware;
 import net.omny.route.middleware.MiddlewarePriority;
-import net.omny.route.middleware.StaticFileMiddleware;
 import net.omny.route.middleware.UrlMiddleware;
 import net.omny.server.WebServer;
 import net.omny.utils.ByteStack;
 import net.omny.utils.Debug;
 import net.omny.utils.Ex;
 import net.omny.utils.HTTPUtils;
+import net.omny.utils.HTTPUtils.Headers;
+import net.omny.utils.HTTPUtils.MimeType;
 import net.omny.utils.HTTPUtils.Version;
 import net.omny.utils.MapUtils;
 import net.omny.utils.Primitive;
@@ -61,7 +63,6 @@ public class Router {
 		// By default
 		// This default handler handle static routing
 		// And non-params URL dependent
-		middleware(new StaticFileMiddleware());
 		this.main = true;
 	}
 
@@ -94,7 +95,6 @@ public class Router {
 				}
 			}
 
-			this.routes.putAll(routes);
 			var middlewares = router.middlewares
 					.entrySet()
 					.stream()
@@ -104,14 +104,49 @@ public class Router {
 						}
 					}).toList()))
 					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-			this.middlewares.putAll(middlewares);
+			addMiddlewaresAndRoutes(routes, middlewares);
 		} else {
-			this.middlewares.putAll(router.middlewares);
-			this.routes.putAll(router.routes);
+			addMiddlewaresAndRoutes(router.routes, router.middlewares);
 		}
 
 		router.setRouted(true);
 		return this;
+	}
+
+	protected void addMiddlewaresAndRoutes(Map<String, Map<Method, RouteData>> routes,
+			Map<MiddlewarePriority, List<Middleware>> middlewares) {
+		// Merge routes
+		for (String path : routes.keySet()) {
+			// Path is already contained
+			if (this.routes.containsKey(path)) {
+				for (Method method : routes.get(path).keySet()) {
+					// We don't override
+					if (!this.routes.get(path).containsKey(method)) {
+						this.routes.get(path).put(method, routes.get(path).get(method));
+					}
+				}
+			} else {
+				// Path is not contained
+				this.routes.putAll(new HashMap<>() {
+					{
+						put(path, routes.get(path));
+					}
+				});
+			}
+		}
+
+		// Merge middlewares
+		for (MiddlewarePriority priority : middlewares.keySet()) {
+			if (this.middlewares.containsKey(priority)) {
+				this.middlewares.get(priority).addAll(middlewares.get(priority));
+			} else {
+				this.middlewares.putAll(new HashMap<>() {
+					{
+						put(priority, middlewares.get(priority));
+					}
+				});
+			}
+		}
 	}
 
 	protected void appendRoutes(Router source, Router destination) {
@@ -273,6 +308,12 @@ public class Router {
 		route(path + "/" + file.getName(), new LoadedFileRoute(file), Method.GET, true);
 	}
 
+	public Router routeHtml(String path, String htmlContent) {
+		Objects.ensureNotNull(path);
+		Objects.ensureNotNull(htmlContent);
+		return route(path, new HtmlRoute(htmlContent), Method.GET);
+	}
+
 	public Router route(Route route) {
 		Objects.ensureNotNull(route.getMethod());
 		return route(route, route.getMethod());
@@ -300,11 +341,11 @@ public class Router {
 				throw new IllegalStateException("There is already a route with this path AND method");
 			} else
 				// We add this routes
-				this.routes.get(path).put(method, new RouteData(route, isStatic));
+				this.routes.get(path).put(method, new RouteData(route, isStatic, path));
 		} else {
 			// there is no path with this name
 			Map<Method, RouteData> map = new HashMap<>();
-			map.put(method, new RouteData(route, isStatic));
+			map.put(method, new RouteData(route, isStatic, path));
 			this.routes.put(path, map);
 		}
 		return this;
@@ -354,6 +395,7 @@ public class Router {
 			list.add(handler);
 			this.middlewares.put(priority, list);
 		}
+		Debug.debug("Middleware {" + handler + " }");
 		return this;
 	}
 
@@ -370,7 +412,17 @@ public class Router {
 	public boolean handleRoute(WebServer webServer, Request request, Socket client) throws IOException {
 
 		// Processing request middlewares...
+		Debug.debug("Middlewares : " + this.middlewares.getOrDefault(MiddlewarePriority.BEFORE, List.of()));
 		for (Middleware middleware : this.middlewares.getOrDefault(MiddlewarePriority.BEFORE, List.of())) {
+			Debug.debug("Checking " + middleware);
+			Debug.debug("Checking " + middleware.getClass().getCanonicalName());
+			if (middleware instanceof UrlMiddleware urlMiddleware) {
+				if (!request.getPath().startsWith(urlMiddleware.getUrl())) {
+					Debug.debug("Skip middleWare " + middleware.getClass().getSimpleName() + " url "
+							+ urlMiddleware.getUrl());
+					continue;
+				}
+			}
 			if (middleware.handle(webServer, this, request, client)) {
 				// If handler returns true
 				// Then we must stop processing more
@@ -402,12 +454,20 @@ public class Router {
 				// Path exist but not with this method
 				continue RouteLoop;
 			}
-			// We compare each division
-			Debug.debug("Found route for " + request.getPath());
 
 			// current division path are the same
-			// It's the same route
+			// The path in the route has params, but not the request
 			request.setParams(request.extractParams(path));
+			if (!request.equalsPath(path, true)) {
+				continue RouteLoop;
+			}
+			// We compare each division that are not params
+
+			// It's the same route
+			Debug.debug("Requests param " + request.getParams() + " / " + routeData.hasParam());
+			Debug.debug("Found dynamic route for " + request.getPath());
+			Debug.debug("RouteData " + routeData + " / " + path);
+
 			sendCorrect(webServer, client, routeData, request);
 			return true;
 		}
@@ -415,6 +475,9 @@ public class Router {
 		// IT'S VERY IMPORTANT, IT MUST STAY AT THE END OF EVERY ROUTES
 		Response response = new Response(request);
 		response.setResponseCode(Code.E404_NOT_FOUND);
+		response.setBinary(false);
+		response.setCharset("UTF-8");
+		response.setHeader(Headers.CONTENT_TYPE, MimeType.HTML);
 
 		var clientStream = client.getOutputStream();
 		var clientStreamWriter = new OutputStreamWriter(clientStream);
@@ -422,10 +485,9 @@ public class Router {
 		BufferedWriter clientWriter = new BufferedWriter(clientStreamWriter);
 		// Writing header
 		clientWriter.write(response.toString());
-		// End of HTTP response following the HTTP specs
-		clientWriter.write("\r\n");
 		// Flush the stream
 		clientWriter.flush();
+		Debug.debug("404 error for '" + request.getPath() + "'");
 		return false;
 	}
 

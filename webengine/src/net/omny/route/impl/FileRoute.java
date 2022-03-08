@@ -23,6 +23,7 @@ import net.omny.views.View;
  *
  * @date 08/08/2021
  */
+@Getter
 public class FileRoute extends Route{
 
 	/**
@@ -85,5 +86,15 @@ public class FileRoute extends Route{
 		});
 		return this.fileView;
 	}
+
+
+	@Override
+	public String toString() {
+		return "{" +
+			" filePath='" + getFilePath() + "'" +
+			", fileView='" + getFileView() + "'" +
+			"}";
+	}
+
 
 }

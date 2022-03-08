@@ -22,7 +22,7 @@ public abstract class AuthentificationMiddleware implements Middleware, UrlMiddl
       return false;
     if (!request.containsHeader(Headers.AUTHORIZATION))
       return false;
-    return auth(request);
+    return !auth(request);
   }
 
   public abstract boolean auth(Request request);
@@ -36,5 +36,10 @@ public abstract class AuthentificationMiddleware implements Middleware, UrlMiddl
   public void setUrl(String url) {
       this.url = url;
   }
+
+  @Override
+    public String toString() {
+        return "AuthentificationMiddleware { url=" + getUrl() + "}";
+    }
 
 }

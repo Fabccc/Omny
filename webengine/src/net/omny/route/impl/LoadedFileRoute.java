@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import lombok.Getter;
 import net.omny.route.Request;
 import net.omny.route.Response;
 import net.omny.utils.Ex;
@@ -12,6 +13,7 @@ import net.omny.utils.HTTPUtils;
 import net.omny.utils.HTTPUtils.Headers;
 import net.omny.views.View;
 
+@Getter
 public class LoadedFileRoute extends FileRoute {
 
   private byte[] bytes;
@@ -58,6 +60,17 @@ public class LoadedFileRoute extends FileRoute {
   public View handle(Request req, Response res) {
     super.handle(req, res);
     return this.v;
+  }
+
+  @Override
+  public String toString() {
+    return "{" +
+        " bytes='" + getBytes() + "'" +
+        ", v='" + getV() + "'" +
+        ", mimeType='" + getMimeType() + "'" +
+        ", filePath='" + getFilePath() + "'" +
+        ", fileView='" + getFileView() + "'" +
+        "}";
   }
 
 }

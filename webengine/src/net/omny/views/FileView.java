@@ -3,9 +3,11 @@ package net.omny.views;
 import java.io.File;
 import java.nio.file.Files;
 
+import lombok.Getter;
 import net.omny.route.Response;
 import net.omny.utils.Ex;
 
+@Getter
 public class FileView implements View {
 
 	private File file;
@@ -26,5 +28,14 @@ public class FileView implements View {
 			
 		});
 	}
+
+
+	@Override
+	public String toString() {
+		return "{" +
+			" file='" + getFile() + "'" +
+			"}";
+	}
+
 
 }

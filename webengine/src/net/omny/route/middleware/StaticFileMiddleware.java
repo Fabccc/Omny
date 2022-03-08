@@ -30,7 +30,7 @@ public class StaticFileMiddleware implements Middleware {
 			// Here findRoute is not null
 			RouteData routeData = null;
 			if ((routeData = findRoute.get(request.getMethod())) != null) {
-				if(!routeData.isStatic()){
+				if (!routeData.isStatic()) {
 					return false;// do not process this
 				}
 				// Here routeData is not null
@@ -78,6 +78,11 @@ public class StaticFileMiddleware implements Middleware {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return "StaticFileMiddleware {}";
 	}
 
 }

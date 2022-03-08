@@ -17,6 +17,7 @@ import net.omny.cache.CachingRequest;
 import net.omny.exceptions.MalformedRequestException;
 import net.omny.route.Request;
 import net.omny.route.Router;
+import net.omny.route.middleware.StaticFileMiddleware;
 import net.omny.utils.ConfigFile;
 import net.omny.utils.Debug;
 import net.omny.utils.Ex;
@@ -134,8 +135,10 @@ public abstract class WebServer {
 		// TODO init the web server
 		// -> handling routes
 		// -> FUTURE : handling middleware
+		this.router.middleware(new StaticFileMiddleware());
 		route(this.router);
 		this.router.setRouted(true);
+		System.out.println(this.router.getMiddlewares());
 	}
 
 	/**

@@ -71,7 +71,7 @@ public final class Request {
 	 * TestTest is treated as parameter
 	 * and is accessible from params hashmap
 	 */
-	@Setter
+	@Setter @Getter
 	private Map<String, String> params = new HashMap<>();
 
 	private Request(String header) throws MalformedRequestException {

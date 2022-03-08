@@ -16,6 +16,7 @@ import net.omny.route.RouterOptions;
 import net.omny.route.impl.FileRoute;
 import net.omny.route.impl.JsonRoute;
 import net.omny.route.impl.TextRoute;
+import net.omny.route.middleware.LoginPasswordMiddleware;
 import net.omny.server.WebServer;
 import net.omny.utils.Debug;
 import net.omny.utils.HTTPUtils;
@@ -50,6 +51,7 @@ public class Test extends WebServer {
 	public void route(Router router) {
 		router.route(TestRouter.class);
 		router.route(NamespaceTestRouter.class);
+		router.route(new DashboardRouter());
 		router.route(new NestedRouter1());
 		router.staticRoute("./webengine/static");
 	}
@@ -75,6 +77,26 @@ public class Test extends WebServer {
 
 		@HTTP(url = "user")
 		public Route userApi = new TextRoute("Oula bizarrrreee");
+
+	}
+
+	public static class DashboardRouter extends NamedRouter {
+
+		public DashboardRouter() {
+			super("dashboard");
+		}
+
+		@Override
+		public void route() {
+			middleware(LoginPasswordMiddleware.middleware((login, password) -> true));
+			routeHtml("/admin", """
+						<html>
+							<body>
+								<h1>Bienvenu, Admin ! </h1>
+							</body>
+						</html>
+					""");
+		}
 
 	}
 
@@ -105,7 +127,7 @@ public class Test extends WebServer {
 
 	}
 
-	public static class ApiUserProfileRoute extends JsonRoute{
+	public static class ApiUserProfileRoute extends JsonRoute {
 
 		public ApiUserProfileRoute() {
 			setAllowCache(false);
@@ -117,13 +139,13 @@ public class Test extends WebServer {
 		public View handle(Request req, Response res) {
 			super.handle(req, res);
 			String s = req.getParams("uuid");
-			if(s == null){
-				return new HTTPUtils.ErrorView(Code.E400_BAD_REQUEST, 
-				"""
-					{
-						"error": "Missing parameter"
-					}	
-				""", MimeType.JSON);
+			if (s == null) {
+				return new HTTPUtils.ErrorView(Code.E400_BAD_REQUEST,
+						"""
+									{
+										"error": "Missing parameter"
+									}
+								""", MimeType.JSON);
 			}
 
 			return new JsonView("""
