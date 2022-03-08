@@ -15,6 +15,8 @@ public class JsonRoute extends Route{
   @Getter
   protected JsonView view;
 
+  public JsonRoute(){}
+
   public JsonRoute(Gson gson){
     this.view = new JsonView(gson);
   }
