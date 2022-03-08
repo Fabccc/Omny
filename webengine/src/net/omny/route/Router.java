@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import joptsimple.internal.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import net.omny.route.impl.AnonymousRoute;
@@ -270,6 +271,16 @@ public class Router {
 		if (main)
 			Debug.debug("Routing {" + path + "/" + file.getName() + "} [static]");
 		route(path + "/" + file.getName(), new LoadedFileRoute(file), Method.GET, true);
+	}
+
+	public Router route(Route route) {
+		Objects.ensureNotNull(route.getMethod());
+		return route(route, route.getMethod());
+	}
+
+	public Router route(Route route, Method method) {
+		Objects.ensureNotNull(route.getPath());
+		return route(route.getPath(), route, method, false);
 	}
 
 	public Router route(String path, BiFunction<Request, Response, View> route, Method method) {
