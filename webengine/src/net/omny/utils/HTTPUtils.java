@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Getter;
+import net.omny.route.Code;
+import net.omny.route.Response;
+import net.omny.views.View;
 
 public class HTTPUtils {
 
@@ -35,6 +38,38 @@ public class HTTPUtils {
 
 	}
 
+	public static class ErrorView implements View {
+
+		private Code code;
+		private String content;
+		private String mimeType;
+
+		public ErrorView(Code code, String content) {
+			this(code, content, MimeType.JSON);
+		}
+
+		public ErrorView(Code code, String content, String mimeType) {
+			this.code = code;
+			this.content = content;
+			this.mimeType = mimeType;
+		}
+
+		@Override
+		public void write(Response res) {
+			res.setResponseCode(this.code);
+			res.setHeader(Headers.CONTENT_TYPE, this.mimeType);
+			res.addBody(content);
+		}
+
+	}
+
+	public static class MimeType{
+		public static final String JAVASCRIPT = "application/javascript";
+		public static final String MICROSOFT_EXECUTABLE = "application/vnd.microsoft.portable-executable";
+		public static final String JSON = "application/json";
+		public static final String HTML = "text/html";
+	}
+
 	public static class Headers {
 		public static final String ACCEPT_DATETIME = "Accept-Datetime";
 		public static final String ACCEPT_CHARSET = "Accept-Charset";
@@ -55,8 +90,8 @@ public class HTTPUtils {
 	private static final Map<String, String> MIMES_TYPES = new HashMap<>();
 
 	static {
-		MIMES_TYPES.put(".js", "application/javascript");
-		MIMES_TYPES.put(".exe", "application/vnd.microsoft.portable-executable");
+		MIMES_TYPES.put(".js", MimeType.JAVASCRIPT);
+		MIMES_TYPES.put(".exe", MimeType.MICROSOFT_EXECUTABLE);
 	}
 
 	/**
