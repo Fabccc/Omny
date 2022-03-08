@@ -164,7 +164,6 @@ public class Response {
 		if (!this.binary) {
 			byteStack.addAllBytes(HTTPUtils.CRLF_AS_BYTES);
 			byteStack.addAllBytes(this.body.getBackedArray());
-			byteStack.addAllBytes(HTTPUtils.CRLF_AS_BYTES);
 		}
 
 		return byteStack.getBackedArray();
