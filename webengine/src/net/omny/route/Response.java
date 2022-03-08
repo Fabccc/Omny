@@ -23,9 +23,10 @@ public class Response {
 	// Connection: Closed
 	// Content-Type: text/html; charset=iso-8859-1
 
-	public static Response noPermission(Request request){
+	public static Response noPermission(Request request) {
 		Response response = new Response(Code.E401_UNAUTHORIZED, request.getHttpVersion());
 		response.binary = false;
+		response.charset = request.getCharset();
 		return response;
 	}
 
@@ -41,6 +42,9 @@ public class Response {
 	@Getter
 	@Setter
 	private boolean binary;
+	@Getter
+	@Setter
+	private String charset;
 
 	/**
 	 * Creating response based on the request (taking the same
@@ -53,14 +57,16 @@ public class Response {
 	public Response(Request req) {
 		this.responseCode = Code.S200_OK;
 		this.httpVersion = req.getHttpVersion();
+		this.charset = req.getCharset();
 	}
 
-	public Response (Code code, HTTPUtils.Version version){
+	public Response(Code code, HTTPUtils.Version version) {
 		this.httpVersion = version;
 		this.responseCode = code;
+		this.charset = "UTF-8";
 	}
 
-	public Response (){
+	public Response() {
 	}
 
 	public String getHeader(String header) {

@@ -112,6 +112,14 @@ public class HTTPUtils {
 				.orElse("text/plain");
 	}
 
+	public static String urlEncode(String base) throws UnsupportedEncodingException {
+		return urlEncode(base, "UTF-8");
+	}
+
+	public static String urlDecode(String base) throws UnsupportedEncodingException {
+		return urlDecode(base, "UTF-8");
+	}
+
 	public static String urlEncode(String base, String charset) throws UnsupportedEncodingException {
 		return URLEncoder.encode(base, charset);
 	}

@@ -1,5 +1,6 @@
 package net.omny.route;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.omny.exceptions.MalformedRequestException;
 import net.omny.utils.HTTPUtils;
+import net.omny.utils.HTTPUtils.Headers;
 
 public final class Request {
 
@@ -52,6 +54,8 @@ public final class Request {
 	private HTTPUtils.Version httpVersion;
 	@Getter
 	private String path;
+	@Getter
+	private String charset;
 
 	/**
 	 * Headers content
@@ -109,6 +113,7 @@ public final class Request {
 			String[] headerLines = lines[i].split(":\\s+");
 			this.headers.put(headerLines[0].toLowerCase(), headerLines[1]);
 		}
+		setCharset();
 	}
 
 	public void readFurther(String nextLines) {
@@ -116,6 +121,20 @@ public final class Request {
 		for (int i = 0; i < lines.length; i++) {
 			String[] headerLines = lines[i].split(":\\s+");
 			this.headers.put(headerLines[0].toLowerCase(), headerLines[1]);
+		}
+		setCharset();
+	}
+
+	private void setCharset(){
+		if(containsHeader(Headers.ACCEPT_CHARSET)){
+			//https://developer.mozilla.org/fr/docs/Web/HTTP/Headers/Accept-Charset
+			String charset = getHeader(Headers.ACCEPT_CHARSET);
+			if(charset.equals("*")){
+				charset = "UTF-8";
+			}else{
+				String[] charsetList = charset.split(",");
+				charset = charsetList[0];
+			}
 		}
 	}
 
@@ -151,7 +170,11 @@ public final class Request {
 		for (int i = 0; i < currentUrlDivision.length; i++) {
 			if (!urlDivions[i].equals(currentUrlDivision[i])) {
 				if(urlDivions[i].startsWith(":")){
-					params.put(urlDivions[i].substring(1), currentUrlDivision[i]);
+					try {
+						params.put(urlDivions[i].substring(1), HTTPUtils.urlDecode(currentUrlDivision[i]));
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
+					}
 				}
 					
 			}
