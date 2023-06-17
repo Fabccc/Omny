@@ -32,7 +32,7 @@ public class FileRoute extends Route{
 	@Getter
 	protected String filePath;
 	
-	protected FileView fileView;
+	protected View fileView;
 
 	/**
 	 * Constructor of the file

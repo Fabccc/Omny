@@ -37,7 +37,7 @@ public class Ex {
 	
 	/**
 	 * 
-	 * Catch exception in a fancy way UwU
+	 * Catch exception in a fancy way
 	 * 
 	 * @author Fabien CAYRE (Computer)
 	 *
